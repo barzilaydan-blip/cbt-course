@@ -1,6 +1,5 @@
 "use client";
-export const dynamic = "force-dynamic";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { BookOpen, Eye, EyeOff } from "lucide-react";
@@ -11,7 +10,7 @@ const OAUTH_ERRORS: Record<string, string> = {
   oauth_failed: "הכניסה דרך גוגל נכשלה. נסה שוב.",
 };
 
-export default function LoginPage() {
+function LoginPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -204,5 +203,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageInner />
+    </Suspense>
   );
 }
