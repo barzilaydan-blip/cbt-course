@@ -3,9 +3,9 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ProgressRing } from "@/components/ui/ProgressRing";
-import { moduleCompletion, isModuleAccessible } from "@/lib/utils";
+import { moduleCompletion, isModuleAccessible, getModuleUnlockStatus } from "@/lib/utils";
 import { BookOpen, Video, FileText, CheckCircle, MessageSquare, ChevronLeft, AlertTriangle, Lock } from "lucide-react";
-import type { Module, Progress } from "@/types";
+import type { Module, Progress, GroupModuleDate } from "@/types";
 
 export default async function ModulesPage() {
   const supabase = await createClient();
@@ -14,13 +14,27 @@ export default async function ModulesPage() {
 
   const service = createServiceClient();
   const [{ data: profile }, { data: modules }, { data: progressList }, { data: exerciseSubs }] = await Promise.all([
-    service.from("profiles").select("role").eq("id", user.id).single(),
+    service.from("profiles").select("role, group_id").eq("id", user.id).single(),
     service.from("modules").select("*").eq("is_published", true).order("order_number"),
     service.from("progress").select("*").eq("user_id", user.id),
     service.from("exercise_submissions").select("module_id").eq("user_id", user.id),
   ]);
 
   const isAdmin = profile?.role === "admin";
+
+  // Fetch group schedule data
+  const groupId = profile?.group_id ?? null;
+  let courseStartDate: string | null = null;
+  let moduleDateOverrides = new Map<string, string>(); // module_id → unlock_date
+
+  if (groupId && !isAdmin) {
+    const [{ data: groupData }, { data: overrides }] = await Promise.all([
+      service.from("groups").select("course_start_date").eq("id", groupId).single(),
+      service.from("group_module_dates").select("module_id, unlock_date").eq("group_id", groupId),
+    ]);
+    courseStartDate = groupData?.course_start_date ?? null;
+    (overrides ?? []).forEach((o: GroupModuleDate) => moduleDateOverrides.set(o.module_id, o.unlock_date));
+  }
   const progressMap = new Map<string, Progress>(
     (progressList ?? []).map((p: Progress) => [p.module_id, p])
   );
@@ -56,13 +70,20 @@ export default async function ModulesPage() {
           const prevPct = idx > 0 ? modPcts[idx - 1] : 100;
           const isComplete = pct === 100;
 
-          const accessible = isModuleAccessible({
-            accessMode: mod.access_mode,
-            meetingDate: mod.meeting_date,
-            isAdmin,
-            isFirst: idx === 0,
-            prevPct,
-          });
+          // Group-based schedule unlock
+          const { unlocked: scheduleUnlocked, unlockDate } = getModuleUnlockStatus(
+            mod.order_number,
+            courseStartDate,
+            moduleDateOverrides.get(mod.id) ?? null,
+          );
+
+          const accessible = isAdmin
+            ? true
+            : mod.access_mode === "open"
+            ? true
+            : mod.access_mode === "locked"
+            ? false
+            : scheduleUnlocked || prevPct === 100;
 
           const cardContent = (
             <div className={`bg-white rounded-xl border transition-all group overflow-hidden ${
@@ -132,11 +153,13 @@ export default async function ModulesPage() {
                     </div>
                   )}
 
-                  {!accessible && mod.meeting_date && (
+                  {!accessible && unlockDate && (
                     <p className="text-xs text-slate-400 mt-2">
-                      יפתח שבוע לפני{" "}
-                      {new Intl.DateTimeFormat("he-IL", { day: "numeric", month: "long" }).format(new Date(mod.meeting_date + "T00:00:00"))}
+                      ייפתח ב-{new Intl.DateTimeFormat("he-IL", { day: "numeric", month: "long", year: "numeric" }).format(unlockDate)}
                     </p>
+                  )}
+                  {!accessible && !unlockDate && !isAdmin && (
+                    <p className="text-xs text-slate-400 mt-2">טרם נקבע תאריך פתיחה</p>
                   )}
                 </div>
 

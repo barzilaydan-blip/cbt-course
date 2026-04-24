@@ -31,6 +31,35 @@ export function moduleCompletion(progress: Partial<Progress> | null): number {
   return Math.round((done / steps.length) * 100);
 }
 
+/**
+ * Calculate the default unlock date for a module based on group's course_start_date.
+ * Module 1 unlocks 7 days BEFORE course_start_date.
+ * Module N unlocks on course_start_date + (N-2) * 7 days.
+ */
+export function defaultUnlockDate(courseStartDate: string, orderNumber: number): Date {
+  const start = new Date(courseStartDate + "T00:00:00");
+  const daysOffset = (orderNumber - 2) * 7; // module 1 = -7, module 2 = 0, module 3 = +7 ...
+  const unlock = new Date(start);
+  unlock.setDate(unlock.getDate() + daysOffset);
+  return unlock;
+}
+
+/**
+ * Check if a module is unlocked for a group.
+ * Returns { unlocked: boolean, unlockDate: Date | null }
+ */
+export function getModuleUnlockStatus(
+  orderNumber: number,
+  courseStartDate: string | null,
+  overrideDate: string | null,
+): { unlocked: boolean; unlockDate: Date | null } {
+  if (!courseStartDate) return { unlocked: false, unlockDate: null };
+  const unlockDate = overrideDate
+    ? new Date(overrideDate + "T00:00:00")
+    : defaultUnlockDate(courseStartDate, orderNumber);
+  return { unlocked: new Date() >= unlockDate, unlockDate };
+}
+
 /** Format a number with thousands separator (Hebrew locale) */
 export function formatPoints(n: number): string {
   return n.toLocaleString("he-IL");

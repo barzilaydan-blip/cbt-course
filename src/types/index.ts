@@ -37,6 +37,15 @@ export interface Group {
   id: string;
   name: string;
   is_active: boolean;
+  course_start_date: string | null;
+  created_at: string;
+}
+
+export interface GroupModuleDate {
+  id: string;
+  group_id: string;
+  module_id: string;
+  unlock_date: string;
   created_at: string;
 }
 

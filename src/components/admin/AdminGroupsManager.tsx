@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Plus, Users, Trash2, Save, CheckCircle, Upload, FileUp, Mail } from "lucide-react";
+import { Plus, Users, Trash2, Save, CheckCircle, Upload, FileUp, Mail, Calendar } from "lucide-react";
 import type { Group, Profile } from "@/types";
 
 interface Props {
@@ -33,6 +33,10 @@ export default function AdminGroupsManager({ initialGroups, students }: Props) {
   );
   const [sendingInvites, setSendingInvites] = useState<string | null>(null);
   const [inviteResult, setInviteResult] = useState<Record<string, string>>({});
+  const [savingDate, setSavingDate] = useState<string | null>(null);
+  const [localDates, setLocalDates] = useState<Record<string, string>>(
+    Object.fromEntries(initialGroups.map(g => [g.id, g.course_start_date ?? ""]))
+  );
   const [importGroupId, setImportGroupId] = useState<string | null>(null);
   const [importRows, setImportRows] = useState<ImportRow[]>([]);
   const [importing, setImporting] = useState(false);
@@ -104,6 +108,15 @@ export default function AdminGroupsManager({ initialGroups, students }: Props) {
       router.refresh();
     }
     setImporting(false);
+  }
+
+  async function saveStartDate(groupId: string) {
+    setSavingDate(groupId);
+    const date = localDates[groupId] || null;
+    await supabase.from("groups").update({ course_start_date: date }).eq("id", groupId);
+    setGroups(groups.map(g => g.id === groupId ? { ...g, course_start_date: date } : g));
+    setSavingDate(null);
+    router.refresh();
   }
 
   async function addManual() {
@@ -388,6 +401,32 @@ export default function AdminGroupsManager({ initialGroups, students }: Props) {
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
+              </div>
+            </div>
+
+            {/* Course start date */}
+            <div className="px-5 py-3 border-b border-slate-100 bg-slate-50">
+              <div className="flex items-center gap-3">
+                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+                <span className="text-sm font-medium text-slate-600">תאריך פתיחת קורס:</span>
+                <input
+                  type="date"
+                  value={localDates[group.id] ?? ""}
+                  onChange={(e) => setLocalDates(prev => ({ ...prev, [group.id]: e.target.value }))}
+                  className="border border-slate-200 rounded-lg px-3 py-1 text-sm text-slate-700 focus:outline-none focus:border-brand-400"
+                />
+                <button
+                  onClick={() => saveStartDate(group.id)}
+                  disabled={savingDate === group.id}
+                  className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-500 text-white hover:bg-brand-700 transition-colors disabled:opacity-50"
+                >
+                  {savingDate === group.id ? "שומר..." : "שמור"}
+                </button>
+                {localDates[group.id] && (
+                  <span className="text-xs text-slate-400">
+                    מפגש 1 ייפתח {new Date(new Date(localDates[group.id]).setDate(new Date(localDates[group.id]).getDate() - 7)).toLocaleDateString("he-IL")}
+                  </span>
+                )}
               </div>
             </div>
 
