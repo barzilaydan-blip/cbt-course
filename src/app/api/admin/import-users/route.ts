@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
       const existing = existingUsers?.users.find(u => u.email === email);
 
       if (existing) {
-        // Update their profile and assign to group
+        // Update their profile and assign to group — never overwrite role
+        const { data: existingProfile } = await service.from("profiles").select("role").eq("id", existing.id).single();
         await service.from("profiles").upsert({
           id: existing.id,
           email,
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
           phone: row.phone?.trim() || null,
           profession: row.profession?.trim() || null,
           group_id: groupId,
-          role: "student",
+          role: existingProfile?.role ?? "student",
         }, { onConflict: "id" });
         results.existing++;
       } else {
