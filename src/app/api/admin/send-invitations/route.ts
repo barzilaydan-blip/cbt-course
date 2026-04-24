@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL || "";
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,30 +33,25 @@ export async function POST(req: NextRequest) {
     const errors: string[] = [];
 
     for (const member of members) {
-      const { error } = await resend.emails.send({
-        from: "CBT Course <onboarding@resend.dev>",
-        to: member.email,
-        subject: `הוזמנת לקורס CBT — ${group?.name}`,
-        html: `
-          <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h1 style="color: #1a3a5c;">שלום ${member.name || ""},</h1>
-            <p style="font-size: 16px; color: #333;">הוזמנת להשתתף בקורס <strong>CBT — טיפול קוגניטיבי-התנהגותי</strong> בקבוצה: <strong>${group?.name}</strong>.</p>
-            <p style="font-size: 16px; color: #333;">לחץ על הכפתור למטה כדי להתחבר לאפליקציה ולהתחיל את הקורס:</p>
-            <a href="${appUrl}" style="display: inline-block; background-color: #2c6e9e; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: bold; margin: 20px 0;">
-              כניסה לקורס
-            </a>
-            <p style="font-size: 14px; color: #666;">האימייל שלך: <strong>${member.email}</strong></p>
-            <p style="font-size: 14px; color: #666;">אם קיבלת מייל זה בטעות, אנא התעלם ממנו.</p>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-            <p style="font-size: 12px; color: #999;">קורס CBT — 12 מפגשים של טיפול קוגניטיבי-התנהגותי</p>
-          </div>
-        `,
-      });
-
-      if (error) {
-        errors.push(`${member.email}: ${error.message}`);
-      } else {
-        sent++;
+      try {
+        const res = await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: member.email,
+            name: member.name || "",
+            groupName: group?.name || "",
+            appUrl,
+          }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          sent++;
+        } else {
+          errors.push(`${member.email}: ${data.error || "unknown error"}`);
+        }
+      } catch (e) {
+        errors.push(`${member.email}: ${e instanceof Error ? e.message : "unknown error"}`);
       }
     }
 
