@@ -18,6 +18,8 @@ interface ImportRow {
   profession?: string;
 }
 
+const EMPTY_MANUAL: ImportRow = { firstName: "", lastName: "", email: "", phone: "", profession: "" };
+
 export default function AdminGroupsManager({ initialGroups, students }: Props) {
   const supabase = createClient();
   const router = useRouter();
@@ -36,6 +38,12 @@ export default function AdminGroupsManager({ initialGroups, students }: Props) {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Manual add
+  const [manualGroupId, setManualGroupId] = useState<string | null>(null);
+  const [manualRow, setManualRow] = useState<ImportRow>(EMPTY_MANUAL);
+  const [addingManual, setAddingManual] = useState(false);
+  const [manualResult, setManualResult] = useState<string | null>(null);
 
   function parseCSV(text: string): ImportRow[] {
     const lines = text.trim().split(/\r?\n/);
@@ -96,6 +104,26 @@ export default function AdminGroupsManager({ initialGroups, students }: Props) {
       router.refresh();
     }
     setImporting(false);
+  }
+
+  async function addManual() {
+    if (!manualGroupId || !manualRow.email || !manualRow.firstName) return;
+    setAddingManual(true);
+    setManualResult(null);
+    const res = await fetch("/api/admin/import-users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rows: [manualRow], groupId: manualGroupId }),
+    });
+    const data = await res.json();
+    if (data.error) {
+      setManualResult(`שגיאה: ${data.error}`);
+    } else {
+      setManualResult(`✓ המשתתף נוסף בהצלחה`);
+      setManualRow(EMPTY_MANUAL);
+      router.refresh();
+    }
+    setAddingManual(false);
   }
 
   async function createGroup() {
@@ -236,6 +264,75 @@ export default function AdminGroupsManager({ initialGroups, students }: Props) {
             {importing ? "מייבא..." : `ייבא ${importRows.length} משתתפים`}
           </button>
         </div>
+      </div>
+
+      {/* Manual add */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-5">
+        <h2 className="font-bold text-brand-900 mb-1 flex items-center gap-2">
+          <Plus className="w-4 h-4" />
+          הוספת משתתף ידנית
+        </h2>
+        <p className="text-xs text-slate-500 mb-4">הוסף משתתף בודד ישירות לקבוצה</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+          <input
+            type="text"
+            placeholder="שם פרטי *"
+            value={manualRow.firstName}
+            onChange={(e) => setManualRow(r => ({ ...r, firstName: e.target.value }))}
+            className="input-he"
+          />
+          <input
+            type="text"
+            placeholder="שם משפחה"
+            value={manualRow.lastName}
+            onChange={(e) => setManualRow(r => ({ ...r, lastName: e.target.value }))}
+            className="input-he"
+          />
+          <input
+            type="email"
+            placeholder="אימייל *"
+            value={manualRow.email}
+            onChange={(e) => setManualRow(r => ({ ...r, email: e.target.value }))}
+            className="input-he"
+            dir="ltr"
+          />
+          <input
+            type="tel"
+            placeholder="טלפון"
+            value={manualRow.phone}
+            onChange={(e) => setManualRow(r => ({ ...r, phone: e.target.value }))}
+            className="input-he"
+            dir="ltr"
+          />
+          <input
+            type="text"
+            placeholder="מקצוע"
+            value={manualRow.profession}
+            onChange={(e) => setManualRow(r => ({ ...r, profession: e.target.value }))}
+            className="input-he"
+          />
+          <select
+            value={manualGroupId ?? ""}
+            onChange={(e) => setManualGroupId(e.target.value || null)}
+            className="input-he"
+          >
+            <option value="">בחר קבוצה *</option>
+            {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+          </select>
+        </div>
+        {manualResult && (
+          <div className={`text-sm px-4 py-2 rounded-lg mb-3 ${manualResult.startsWith("שגיאה") ? "bg-red-50 text-red-600" : "bg-green-50 text-green-700"}`}>
+            {manualResult}
+          </div>
+        )}
+        <button
+          onClick={addManual}
+          disabled={addingManual || !manualGroupId || !manualRow.email || !manualRow.firstName}
+          className="flex items-center gap-2 bg-brand-500 hover:bg-brand-700 text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors disabled:opacity-50"
+        >
+          <Plus className="w-4 h-4" />
+          {addingManual ? "מוסיף..." : "הוסף משתתף"}
+        </button>
       </div>
 
       {/* Groups list */}
