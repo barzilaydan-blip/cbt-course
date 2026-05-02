@@ -6,6 +6,7 @@ import SortingGame from "@/components/practice/SortingGame";
 import MatchingGame from "@/components/practice/MatchingGame";
 import ClinicalExercise from "@/components/practice/ClinicalExercise";
 import ExpectationsForm from "@/components/practice/ExpectationsForm";
+import CoreBeliefsGame from "@/components/practice/CoreBeliefsGame";
 import type { Module, ExerciseSubmission } from "@/types";
 
 export default async function PracticePage({ params }: { params: { id: string } }) {
@@ -67,6 +68,19 @@ export default async function PracticePage({ params }: { params: { id: string } 
           </p>
         </div>
         <SortingGame moduleId={module.id} userId={user.id} backHref={`/modules/${module.id}`} alreadyCompleted={alreadyCompleted} />
+      </div>
+    );
+  }
+
+  // Module 5 gets the core beliefs game
+  if (module.order_number === 5) {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-brand-900">עדשות האמונות — {module.title_he}</h1>
+          <p className="text-slate-500 mt-1 text-sm">זהה אמונות יסוד דרך מחשבות אוטומטיות</p>
+        </div>
+        <CoreBeliefsGame moduleId={module.id} userId={user.id} backHref={`/modules/${module.id}`} alreadyCompleted={alreadyCompleted} />
       </div>
     );
   }
