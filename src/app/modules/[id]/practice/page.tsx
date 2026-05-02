@@ -16,11 +16,14 @@ export default async function PracticePage({ params }: { params: { id: string } 
 
   const service = createServiceClient();
 
-  const [{ data: mod }, { data: progress }, { data: existingSubmission }] = await Promise.all([
+  const [{ data: mod }, { data: progress }, { data: existingSubmission }, { data: profileData }] = await Promise.all([
     service.from("modules").select("*").eq("id", params.id).single(),
     service.from("progress").select("practice_completed").eq("user_id", user.id).eq("module_id", params.id).maybeSingle(),
     service.from("exercise_submissions").select("id, answers, status, admin_feedback, points_awarded, submitted_at, reviewed_at").eq("user_id", user.id).eq("module_id", params.id).maybeSingle(),
+    service.from("profiles").select("group_id").eq("id", user.id).single(),
   ]);
+
+  const groupId = profileData?.group_id ?? null;
   if (!mod) notFound();
 
   const module = mod as Module;
@@ -80,7 +83,7 @@ export default async function PracticePage({ params }: { params: { id: string } 
           <h1 className="text-2xl font-bold text-brand-900">עדשות האמונות — {module.title_he}</h1>
           <p className="text-slate-500 mt-1 text-sm">זהה אמונות יסוד דרך מחשבות אוטומטיות</p>
         </div>
-        <CoreBeliefsGame moduleId={module.id} userId={user.id} backHref={`/modules/${module.id}`} alreadyCompleted={alreadyCompleted} />
+        <CoreBeliefsGame moduleId={module.id} userId={user.id} groupId={groupId} backHref={`/modules/${module.id}`} alreadyCompleted={alreadyCompleted} />
       </div>
     );
   }

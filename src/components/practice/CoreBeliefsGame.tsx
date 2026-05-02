@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle, ArrowLeft, RotateCcw, Eye } from "lucide-react";
+import AskLecturerButton from "@/components/ui/AskLecturerButton";
 
 // ── Audio ──────────────────────────────────────────────────────────────────
 function playTone(freq: number, type: OscillatorType, dur: number, gain = 0.3) {
@@ -166,11 +167,12 @@ const SCENARIOS: Scenario[] = [
 interface Props {
   moduleId: string;
   userId: string;
+  groupId: string | null;
   backHref: string;
   alreadyCompleted: boolean;
 }
 
-export default function CoreBeliefsGame({ moduleId, userId, backHref, alreadyCompleted }: Props) {
+export default function CoreBeliefsGame({ moduleId, userId, groupId, backHref, alreadyCompleted }: Props) {
   const router = useRouter();
   const [scenarioIdx, setScenarioIdx] = useState(0);
   const [selectedLens, setSelectedLens] = useState<LensId | null>(null);
@@ -268,13 +270,23 @@ export default function CoreBeliefsGame({ moduleId, userId, backHref, alreadyCom
 
   if (finished) {
     return (
-      <div className="text-center py-16">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4">
+      <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-6">
+        <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full">
           <CheckCircle className="w-10 h-10 text-green-500" />
         </div>
-        <h2 className="text-2xl font-bold text-brand-900 mb-2">כל הכבוד!</h2>
-        <p className="text-slate-500 mb-6">השלמת את תרגיל זיהוי אמונות היסוד בהצלחה</p>
-        <a href={backHref} className="btn-primary px-6 py-2.5">חזרה למפגש</a>
+        <div>
+          <h2 className="text-2xl font-bold text-brand-900 mb-2">כל הכבוד!</h2>
+          <p className="text-slate-500">השלמת את תרגיל זיהוי אמונות היסוד בהצלחה</p>
+        </div>
+
+        {/* Feedback / question section */}
+        <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 text-right">
+          <p className="text-sm font-semibold text-slate-700 mb-1">יש שאלה או משהו לא ברור?</p>
+          <p className="text-xs text-slate-500 mb-4">שלח שאלה למנחה הקורס — הוא יחזור אליך בהקדם</p>
+          <AskLecturerButton userId={userId} groupId={groupId} />
+        </div>
+
+        <a href={backHref} className="inline-block btn-primary px-6 py-2.5">חזרה למפגש</a>
       </div>
     );
   }
