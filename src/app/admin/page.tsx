@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import Link from "next/link";
-import { Settings, Users, BookOpen, ChevronLeft, FolderOpen, MessageCircle, BarChart3, ShieldCheck, ClipboardList, SlidersHorizontal } from "lucide-react";
+import { Settings, Users, BookOpen, ChevronLeft, FolderOpen, MessageCircle, BarChart3, ShieldCheck, ClipboardList, SlidersHorizontal, Activity } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import AdminStudentsTable from "@/components/admin/AdminStudentsTable";
 import type { Module, Group } from "@/types";
@@ -107,6 +107,7 @@ export default async function AdminPage() {
           { href: "/admin/chat", icon: MessageCircle, label: "ניטור צ'אט", desc: "צפה בשיחות הקבוצות", color: "bg-blue-50 text-blue-600" },
           { href: "/admin/exercises", icon: ClipboardList, label: "תרגילים קליניים", desc: "בדוק הגשות ותן משוב לסטודנטים", color: "bg-rose-50 text-rose-600" },
           { href: "/admin/settings", icon: SlidersHorizontal, label: "הגדרות קורס", desc: "Zoom, סילבוס, יום ושעת מפגשים", color: "bg-slate-50 text-slate-600" },
+          { href: "/admin/activity", icon: Activity, label: "מעקב נוכחות", desc: "זמני כניסה ושהייה של סטודנטים", color: "bg-green-50 text-green-600" },
         ].map(({ href, icon: Icon, label, desc, color }) => (
           <Link
             key={href}

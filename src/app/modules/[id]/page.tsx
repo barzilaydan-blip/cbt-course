@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import MarkWatchedButton from "@/components/modules/MarkWatchedButton";
 import LessonActivityBar from "@/components/modules/LessonActivityBar";
+import PageVisitTracker from "@/components/tracking/PageVisitTracker";
 import { moduleCompletion, isModuleAccessible } from "@/lib/utils";
 import type { Module, Progress, Resource } from "@/types";
 
@@ -69,6 +70,7 @@ export default async function ModulePage({ params }: { params: { id: string } })
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
+      <PageVisitTracker moduleId={currentMod.id} />
 
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-slate-400">
