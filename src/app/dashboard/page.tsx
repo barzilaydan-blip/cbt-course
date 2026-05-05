@@ -207,11 +207,22 @@ export default async function DashboardPage() {
   // Next upcoming session from syllabus
   const nextMod = allMods.find((m) => m.meeting_date && m.meeting_date >= today);
 
-  // Exercise banners
-  const mod4 = allMods.find((m) => m.order_number === 4);
+  // Exercise banners — only show if the module is accessible (not locked)
+  const mod1Entry = modPcts.find(({ mod }) => mod.order_number === 1);
+  const mod4Entry = modPcts.find(({ mod }) => mod.order_number === 4);
+
+  const mod1 = mod1Entry?.mod;
+  const mod4 = mod4Entry?.mod;
+
+  const mod1Sub = mod1 ? exerciseMap.get(mod1.id) : null;
   const mod4Sub = mod4 ? exerciseMap.get(mod4.id) : null;
-  const mod4Pending = mod4 && !mod4Sub;
-  const mod4Reviewed = mod4 && mod4Sub?.status === "reviewed";
+
+  const mod1Accessible = mod1Entry && !mod1Entry.locked;
+  const mod4Accessible = mod4Entry && !mod4Entry.locked;
+
+  const mod1Pending = mod1 && mod1Accessible && !mod1Sub;
+  const mod4Pending = mod4 && mod4Accessible && !mod4Sub;
+  const mod4Reviewed = mod4 && mod4Accessible && mod4Sub?.status === "reviewed";
 
   // Leaderboard display helpers
   const MEDALS = ["🥇", "🥈", "🥉"];
@@ -238,6 +249,17 @@ export default async function DashboardPage() {
           <div className="flex-1">
             <p className="font-semibold text-amber-300">יש לך תרגיל קליני שממתין להגשה</p>
             <p className="text-amber-400/70 text-sm mt-0.5">מפגש 4 — לחץ להגשת התרגיל הקליני</p>
+          </div>
+          <ChevronLeft className="w-4 h-4 text-amber-400 shrink-0" />
+        </Link>
+      )}
+      {mod1Pending && (
+        <Link href={`/modules/${mod1!.id}/practice`}
+          className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl px-5 py-4 hover:border-amber-400/50 transition-colors">
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+          <div className="flex-1">
+            <p className="font-semibold text-amber-300">טופס ההיכרות עדיין לא מולא</p>
+            <p className="text-amber-400/70 text-sm mt-0.5">מפגש 1 — לחץ למילוי טופס ההיכרות הראשוני</p>
           </div>
           <ChevronLeft className="w-4 h-4 text-amber-400 shrink-0" />
         </Link>
