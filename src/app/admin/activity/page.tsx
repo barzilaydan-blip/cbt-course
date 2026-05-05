@@ -17,8 +17,9 @@ function formatDuration(seconds: number | null): string {
 
 function formatDateTime(iso: string) {
   const d = new Date(iso);
-  const date = new Intl.DateTimeFormat("he-IL", { day: "2-digit", month: "2-digit", year: "2-digit" }).format(d);
-  const time = new Intl.DateTimeFormat("he-IL", { hour: "2-digit", minute: "2-digit" }).format(d);
+  const tz = { timeZone: "Asia/Jerusalem" };
+  const date = new Intl.DateTimeFormat("he-IL", { day: "2-digit", month: "2-digit", year: "2-digit", ...tz }).format(d);
+  const time = new Intl.DateTimeFormat("he-IL", { hour: "2-digit", minute: "2-digit", ...tz }).format(d);
   return { date, time };
 }
 
