@@ -131,13 +131,24 @@ export default async function ModulePage({ params }: { params: { id: string } })
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
         {currentMod.video_url ? (
           <>
-            <div className="aspect-video bg-slate-900">
-              <iframe
-                src={currentMod.video_url}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
+            <div className="bg-slate-900">
+              {currentMod.video_url.trimStart().startsWith("<") ? (
+                /* Full embed HTML (e.g. Vimeo responsive div+iframe) */
+                <div
+                  dangerouslySetInnerHTML={{ __html: currentMod.video_url }}
+                  className="w-full [&>div]:!padding-0 [&_iframe]:w-full [&_iframe]:aspect-video [&_iframe]:h-auto"
+                />
+              ) : (
+                /* Plain URL */
+                <div className="aspect-video">
+                  <iframe
+                    src={currentMod.video_url}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              )}
             </div>
             <div className="px-5 py-4 flex items-center justify-between border-t border-slate-100">
               <div>
