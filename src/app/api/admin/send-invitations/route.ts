@@ -14,15 +14,17 @@ export async function POST(req: NextRequest) {
     const { data: profile } = await service.from("profiles").select("role").eq("id", user.id).single();
     if (profile?.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    const { groupId } = await req.json() as { groupId: string };
+    const { groupId, userId } = await req.json() as { groupId: string; userId?: string };
 
     // Get group name and members
     const { data: group } = await service.from("groups").select("name").eq("id", groupId).single();
-    const { data: members } = await service
+    let membersQuery = service
       .from("profiles")
       .select("name, email")
       .eq("group_id", groupId)
       .eq("role", "student");
+    if (userId) membersQuery = membersQuery.eq("id", userId);
+    const { data: members } = await membersQuery;
 
     if (!members || members.length === 0) {
       return NextResponse.json({ error: "No members in group" }, { status: 400 });

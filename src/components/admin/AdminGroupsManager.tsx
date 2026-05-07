@@ -33,6 +33,7 @@ export default function AdminGroupsManager({ initialGroups, students }: Props) {
   );
   const [sendingInvites, setSendingInvites] = useState<string | null>(null);
   const [inviteResult, setInviteResult] = useState<Record<string, string>>({});
+  const [sendingSingle, setSendingSingle] = useState<string | null>(null);
   const [savingDate, setSavingDate] = useState<string | null>(null);
   const [localDates, setLocalDates] = useState<Record<string, string>>(
     Object.fromEntries(initialGroups.map(g => [g.id, g.course_start_date ?? ""]))
@@ -73,6 +74,21 @@ export default function AdminGroupsManager({ initialGroups, students }: Props) {
       setImportResult(null);
     };
     reader.readAsText(file, "utf-8");
+  }
+
+  async function sendSingleInvitation(groupId: string, userId: string) {
+    setSendingSingle(userId);
+    const res = await fetch("/api/admin/send-invitations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ groupId, userId }),
+    });
+    const data = await res.json();
+    setInviteResult(prev => ({
+      ...prev,
+      [userId]: data.error ? `שגיאה` : `✓`,
+    }));
+    setSendingSingle(null);
   }
 
   async function sendInvitations(groupId: string) {
@@ -469,6 +485,21 @@ export default function AdminGroupsManager({ initialGroups, students }: Props) {
                         <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full shrink-0">
                           קבוצה אחרת
                         </span>
+                      )}
+                      {isInThisGroup && (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.preventDefault(); sendSingleInvitation(group.id, student.id); }}
+                          disabled={sendingSingle === student.id}
+                          title="שלח הזמנה לסטודנט זה בלבד"
+                          className="shrink-0 p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-40"
+                        >
+                          {inviteResult[student.id] === "✓"
+                            ? <span className="text-green-600 text-xs font-bold">✓</span>
+                            : sendingSingle === student.id
+                            ? <span className="text-xs">...</span>
+                            : <Mail className="w-3.5 h-3.5" />}
+                        </button>
                       )}
                     </label>
                   );
