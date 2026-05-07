@@ -7,6 +7,7 @@ import type { CourseSettings } from "@/types";
 export default function AdminCourseSettings({ settings }: { settings: CourseSettings | null }) {
   const supabase = createClient();
   const [zoomUrl, setZoomUrl] = useState(settings?.zoom_url ?? "");
+  const [zoomPassword, setZoomPassword] = useState(settings?.zoom_password ?? "");
   const [syllabusUrl, setSyllabusUrl] = useState(settings?.syllabus_url ?? "");
   const [meetingTime, setMeetingTime] = useState(settings?.meeting_time ?? "18:00");
   const [meetingDayHe, setMeetingDayHe] = useState(settings?.meeting_day_he ?? "שלישי");
@@ -18,6 +19,7 @@ export default function AdminCourseSettings({ settings }: { settings: CourseSett
     await supabase.from("course_settings").upsert({
       id: 1,
       zoom_url: zoomUrl.trim() || null,
+      zoom_password: zoomPassword.trim() || null,
       syllabus_url: syllabusUrl.trim() || null,
       meeting_time: meetingTime.trim() || "18:00",
       meeting_day_he: meetingDayHe.trim() || "שלישי",
@@ -65,16 +67,29 @@ export default function AdminCourseSettings({ settings }: { settings: CourseSett
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-1.5">🎥 קישור Zoom קבוע לקורס</label>
-        <input
-          type="url"
-          value={zoomUrl}
-          onChange={(e) => { setZoomUrl(e.target.value); setSaved(false); }}
-          placeholder="https://zoom.us/j/..."
-          className="input-he"
-          dir="ltr"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">🎥 קישור Zoom קבוע לקורס</label>
+          <input
+            type="url"
+            value={zoomUrl}
+            onChange={(e) => { setZoomUrl(e.target.value); setSaved(false); }}
+            placeholder="https://zoom.us/j/..."
+            className="input-he"
+            dir="ltr"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">🔑 סיסמת Zoom</label>
+          <input
+            type="text"
+            value={zoomPassword}
+            onChange={(e) => { setZoomPassword(e.target.value); setSaved(false); }}
+            placeholder="123456"
+            className="input-he"
+            dir="ltr"
+          />
+        </div>
       </div>
 
       <div>

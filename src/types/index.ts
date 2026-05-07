@@ -80,6 +80,7 @@ export interface Module {
 export interface CourseSettings {
   id: number;
   zoom_url: string | null;
+  zoom_password: string | null;
   syllabus_url: string | null;
   meeting_time: string | null;
   meeting_day_he: string | null;

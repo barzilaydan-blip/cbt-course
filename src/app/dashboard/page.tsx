@@ -299,13 +299,23 @@ export default async function DashboardPage() {
             </h2>
 
             {courseSettings?.zoom_url ? (
-              <a href={courseSettings.zoom_url} target="_blank" rel="noopener noreferrer"
-                className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded-xl
-                           transition-all duration-200 flex items-center justify-center gap-2
-                           shadow-lg shadow-blue-500/30 hover:shadow-blue-400/40">
-                <Video className="w-4 h-4" />
-                הצטרף ל-Zoom
-              </a>
+              <div className="space-y-2">
+                <a href={courseSettings.zoom_url} target="_blank" rel="noopener noreferrer"
+                  className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded-xl
+                             transition-all duration-200 flex items-center justify-center gap-2
+                             shadow-lg shadow-blue-500/30 hover:shadow-blue-400/40">
+                  <Video className="w-4 h-4" />
+                  הצטרף ל-Zoom
+                </a>
+                {courseSettings.zoom_password && (
+                  <div className="flex items-center justify-between bg-slate-700/50 border border-slate-600 rounded-xl px-3 py-2">
+                    <span className="text-xs text-slate-400">סיסמה:</span>
+                    <span className="text-sm font-bold text-white tracking-wider" dir="ltr">
+                      {courseSettings.zoom_password}
+                    </span>
+                  </div>
+                )}
+              </div>
             ) : (
               <button disabled
                 className="w-full bg-blue-500/30 text-blue-300/50 font-bold py-3 px-4 rounded-xl
