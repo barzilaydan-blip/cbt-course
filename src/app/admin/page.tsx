@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import Link from "next/link";
-import { Settings, Users, BookOpen, ChevronLeft, FolderOpen, MessageCircle, BarChart3, ShieldCheck, ClipboardList, SlidersHorizontal, Activity } from "lucide-react";
+import { Settings, Users, BookOpen, ChevronLeft, FolderOpen, MessageCircle, BarChart3, ShieldCheck, ClipboardList, SlidersHorizontal, Activity, AlertTriangle } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import AdminStudentsTable from "@/components/admin/AdminStudentsTable";
 import type { Module, Group } from "@/types";
@@ -21,15 +21,19 @@ export default async function AdminPage() {
   const supabase = await createClient();
   const service = createServiceClient();
 
-  const [{ data: modules }, { data: profiles }, { data: progress }, { data: groups }] =
+  const [{ data: modules }, { data: profiles }, { data: progress }, { data: groups }, { data: pendingExercises }, { data: pendingQuestions }] =
     await Promise.all([
       service.from("modules").select("*").order("order_number"),
       service.from("profiles").select("id, name, email, role, total_points, group_id, phone, profession"),
       service.from("progress").select("user_id, module_id, points_earned, quiz_completed, practice_completed"),
       service.from("groups").select("*").order("created_at"),
+      service.from("exercise_submissions").select("id").eq("status", "submitted"),
+      service.from("questions").select("id").eq("status", "pending"),
     ]);
 
   const students = (profiles ?? []).filter((p: RawProfile) => p.role === "student");
+  const pendingExercisesCount = (pendingExercises ?? []).length;
+  const pendingQuestionsCount = (pendingQuestions ?? []).length;
   const groupMap = new Map<string, Group>((groups ?? []).map((g: Group) => [g.id, g]));
 
   // Per-group stats
@@ -55,6 +59,36 @@ export default async function AdminPage() {
         </h1>
         <p className="text-slate-500 mt-1">ניהול קורס, קבוצות ומשאבים</p>
       </div>
+
+      {/* Pending items alert */}
+      {(pendingExercisesCount > 0 || pendingQuestionsCount > 0) && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 space-y-2">
+          <p className="font-bold text-amber-800 flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4" />
+            פריטים הממתינים לטיפולך
+          </p>
+          <div className="flex flex-wrap gap-3">
+            {pendingExercisesCount > 0 && (
+              <Link href="/admin/exercises"
+                className="flex items-center gap-2 bg-white border border-amber-300 text-amber-800 text-sm font-semibold px-3 py-1.5 rounded-xl hover:bg-amber-100 transition-colors">
+                <span className="bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {pendingExercisesCount}
+                </span>
+                תרגילים ממתינים לבדיקה
+              </Link>
+            )}
+            {pendingQuestionsCount > 0 && (
+              <Link href="/admin/chat"
+                className="flex items-center gap-2 bg-white border border-amber-300 text-amber-800 text-sm font-semibold px-3 py-1.5 rounded-xl hover:bg-amber-100 transition-colors">
+                <span className="bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {pendingQuestionsCount}
+                </span>
+                שאלות ממתינות למענה
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Global stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -101,21 +135,26 @@ export default async function AdminPage() {
       {/* Quick links */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
-          { href: "/admin/groups", icon: Users, label: "ניהול קבוצות", desc: "צור קבוצות ושייך סטודנטים", color: "bg-purple-50 text-purple-600" },
-          { href: "/admin/approved", icon: ShieldCheck, label: "גישה — מיילים מאושרים", desc: "ייבא מיילים מ-Smoove לאישור גישה", color: "bg-green-50 text-green-600" },
-          { href: "/admin/resources", icon: FolderOpen, label: "ניהול משאבים", desc: "העלה קבצים ושאלונים", color: "bg-teal-50 text-teal-600" },
-          { href: "/admin/chat", icon: MessageCircle, label: "ניטור צ'אט", desc: "צפה בשיחות הקבוצות", color: "bg-blue-50 text-blue-600" },
-          { href: "/admin/exercises", icon: ClipboardList, label: "תרגילים קליניים", desc: "בדוק הגשות ותן משוב לסטודנטים", color: "bg-rose-50 text-rose-600" },
-          { href: "/admin/settings", icon: SlidersHorizontal, label: "הגדרות קורס", desc: "Zoom, סילבוס, יום ושעת מפגשים", color: "bg-slate-50 text-slate-600" },
-          { href: "/admin/activity", icon: Activity, label: "מעקב נוכחות", desc: "זמני כניסה ושהייה של סטודנטים", color: "bg-green-50 text-green-600" },
-        ].map(({ href, icon: Icon, label, desc, color }) => (
+          { href: "/admin/groups", icon: Users, label: "ניהול קבוצות", desc: "צור קבוצות ושייך סטודנטים", color: "bg-purple-50 text-purple-600", badge: 0 },
+          { href: "/admin/approved", icon: ShieldCheck, label: "גישה — מיילים מאושרים", desc: "ייבא מיילים מ-Smoove לאישור גישה", color: "bg-green-50 text-green-600", badge: 0 },
+          { href: "/admin/resources", icon: FolderOpen, label: "ניהול משאבים", desc: "העלה קבצים ושאלונים", color: "bg-teal-50 text-teal-600", badge: 0 },
+          { href: "/admin/chat", icon: MessageCircle, label: "ניטור צ'אט", desc: "צפה בשיחות הקבוצות", color: "bg-blue-50 text-blue-600", badge: pendingQuestionsCount },
+          { href: "/admin/exercises", icon: ClipboardList, label: "תרגילים קליניים", desc: "בדוק הגשות ותן משוב לסטודנטים", color: "bg-rose-50 text-rose-600", badge: pendingExercisesCount },
+          { href: "/admin/settings", icon: SlidersHorizontal, label: "הגדרות קורס", desc: "Zoom, סילבוס, יום ושעת מפגשים", color: "bg-slate-50 text-slate-600", badge: 0 },
+          { href: "/admin/activity", icon: Activity, label: "מעקב נוכחות", desc: "זמני כניסה ושהייה של סטודנטים", color: "bg-green-50 text-green-600", badge: 0 },
+        ].map(({ href, icon: Icon, label, desc, color, badge }) => (
           <Link
             key={href}
             href={href}
             className="flex items-center gap-4 bg-white rounded-xl border border-slate-200 p-4 hover:border-brand-300 hover:shadow-sm transition-all group"
           >
-            <div className={`rounded-xl p-3 ${color}`}>
+            <div className={`rounded-xl p-3 ${color} relative`}>
               <Icon className="w-5 h-5" />
+              {badge > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-4.5 h-4.5 min-w-[18px] min-h-[18px] rounded-full flex items-center justify-center leading-none px-1">
+                  {badge}
+                </span>
+              )}
             </div>
             <div className="flex-1">
               <p className="font-semibold text-slate-800">{label}</p>
