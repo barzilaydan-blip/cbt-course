@@ -6,8 +6,8 @@ import { ChevronRight, ChevronLeft } from "lucide-react";
 import MarkWatchedButton from "@/components/modules/MarkWatchedButton";
 import LessonActivityBar from "@/components/modules/LessonActivityBar";
 import PageVisitTracker from "@/components/tracking/PageVisitTracker";
-import { moduleCompletion, isModuleAccessible } from "@/lib/utils";
-import type { Module, Progress, Resource } from "@/types";
+import { moduleCompletion, isModuleAccessible, getModuleUnlockStatus } from "@/lib/utils";
+import type { Module, Progress, Resource, GroupModuleDate } from "@/types";
 
 export default async function ModulePage({ params }: { params: { id: string } }) {
   const supabase = await createClient();
@@ -17,7 +17,7 @@ export default async function ModulePage({ params }: { params: { id: string } })
   const service = createServiceClient();
 
   const [{ data: profile }, { data: mod }, { data: progress }, { data: allModules }, { data: moduleResources }, { data: exerciseSub }, { data: allProgress }, { data: allExSubs }] = await Promise.all([
-    service.from("profiles").select("role").eq("id", user.id).single(),
+    service.from("profiles").select("role, group_id").eq("id", user.id).single(),
     service.from("modules").select("*").eq("id", params.id).single(),
     service.from("progress").select("*").eq("user_id", user.id).eq("module_id", params.id).maybeSingle(),
     service.from("modules").select("id,order_number,meeting_date,access_mode").eq("is_published", true).order("order_number"),
@@ -31,26 +31,47 @@ export default async function ModulePage({ params }: { params: { id: string } })
 
   // Access control — redirect students away from locked modules
   const isAdmin = profile?.role === "admin";
+  const groupId = profile?.group_id ?? null;
+
+  // Fetch group schedule for non-admins
+  let courseStartDate: string | null = null;
+  let moduleDateOverrides = new Map<string, string>();
+  if (groupId && !isAdmin) {
+    const [{ data: groupData }, { data: overrides }] = await Promise.all([
+      service.from("groups").select("course_start_date").eq("id", groupId).single(),
+      service.from("group_module_dates").select("module_id, unlock_date").eq("group_id", groupId),
+    ]);
+    courseStartDate = groupData?.course_start_date ?? null;
+    ((overrides ?? []) as GroupModuleDate[]).forEach((o) => moduleDateOverrides.set(o.module_id, o.unlock_date));
+  }
+
   const sorted = ((allModules ?? []) as { id: string; order_number: number; meeting_date: string | null; access_mode: "locked" | "open" | "auto" }[])
     .sort((a, b) => a.order_number - b.order_number);
   const modIndex = sorted.findIndex((m) => m.id === params.id);
-  const exSubIds = new Set((allExSubs ?? []).map((s: { module_id: string }) => s.module_id));
   const progMap = new Map((allProgress ?? []).map((p: Progress) => [p.module_id, p]));
 
-  if (modIndex !== -1) {
+  if (modIndex !== -1 && !isAdmin) {
+    const currentMeta = sorted[modIndex];
     const prevMod = modIndex > 0 ? sorted[modIndex - 1] : null;
     let prevPct = 100;
     if (prevMod) {
       const pp = progMap.get(prevMod.id);
       prevPct = moduleCompletion(pp ?? null);
     }
-    const accessible = isModuleAccessible({
-      accessMode: (mod as Module).access_mode,
-      meetingDate: (mod as Module).meeting_date,
-      isAdmin,
-      isFirst: modIndex === 0,
-      prevPct,
-    });
+
+    const { unlocked: scheduleUnlocked } = getModuleUnlockStatus(
+      (mod as Module).order_number,
+      courseStartDate,
+      moduleDateOverrides.get(params.id) ?? null,
+    );
+
+    const accessible =
+      currentMeta.access_mode === "open"
+        ? true
+        : currentMeta.access_mode === "locked"
+        ? false
+        : modIndex === 0 || scheduleUnlocked || prevPct === 100;
+
     if (!accessible) redirect("/modules");
   }
 
