@@ -326,7 +326,7 @@ export default function LessonActivityBar({
                   <Download className="w-4 h-4 text-slate-400 group-hover:text-brand-500 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-slate-700 group-hover:text-brand-700 truncate">{res.title_he}</p>
-                    {res.file_type && <span className="text-xs text-slate-400 uppercase">{res.file_type}</span>}
+                    <span className="text-xs text-brand-500 font-medium">{res.category}</span>
                   </div>
                   <ChevronLeft className="w-3.5 h-3.5 text-slate-300 group-hover:text-brand-400 shrink-0" />
                 </a>
