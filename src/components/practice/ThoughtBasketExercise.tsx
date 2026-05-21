@@ -259,7 +259,10 @@ export default function ThoughtBasketExercise({ moduleId, existingSubmission, ba
             onClick={() => add("negative")}
             className="flex-1 max-w-[140px] bg-red-50 hover:bg-red-100 active:scale-95 border-2 border-red-200 hover:border-red-400 rounded-2xl py-5 px-2 text-center transition-all"
           >
-            <div className="text-4xl mb-2">😢</div>
+            <div className="relative inline-block mb-2" style={{ width: 52, height: 52 }}>
+              <span style={{ fontSize: 52, lineHeight: 1 }}>🧺</span>
+              <span className="absolute" style={{ fontSize: 22, bottom: 6, left: '50%', transform: 'translateX(-50%)' }}>😢</span>
+            </div>
             <div className="font-semibold text-red-800 text-xs leading-tight">מחשבות<br/>רעות</div>
             <div className="text-red-600 text-3xl font-bold mt-3">{counts.negative}</div>
           </button>
@@ -268,7 +271,10 @@ export default function ThoughtBasketExercise({ moduleId, existingSubmission, ba
             onClick={() => add("neutral")}
             className="flex-1 max-w-[140px] bg-slate-50 hover:bg-slate-100 active:scale-95 border-2 border-slate-200 hover:border-slate-400 rounded-2xl py-5 px-2 text-center transition-all"
           >
-            <div className="text-4xl mb-2">😐</div>
+            <div className="relative inline-block mb-2" style={{ width: 52, height: 52 }}>
+              <span style={{ fontSize: 52, lineHeight: 1 }}>🧺</span>
+              <span className="absolute" style={{ fontSize: 22, bottom: 6, left: '50%', transform: 'translateX(-50%)' }}>😐</span>
+            </div>
             <div className="font-semibold text-slate-600 text-xs leading-tight">מחשבות<br/>ניטרליות</div>
             <div className="text-slate-600 text-3xl font-bold mt-3">{counts.neutral}</div>
           </button>
@@ -277,7 +283,10 @@ export default function ThoughtBasketExercise({ moduleId, existingSubmission, ba
             onClick={() => add("positive")}
             className="flex-1 max-w-[140px] bg-green-50 hover:bg-green-100 active:scale-95 border-2 border-green-200 hover:border-green-400 rounded-2xl py-5 px-2 text-center transition-all"
           >
-            <div className="text-4xl mb-2">😊</div>
+            <div className="relative inline-block mb-2" style={{ width: 52, height: 52 }}>
+              <span style={{ fontSize: 52, lineHeight: 1 }}>🧺</span>
+              <span className="absolute" style={{ fontSize: 22, bottom: 6, left: '50%', transform: 'translateX(-50%)' }}>😊</span>
+            </div>
             <div className="font-semibold text-green-800 text-xs leading-tight">מחשבות<br/>טובות</div>
             <div className="text-green-600 text-3xl font-bold mt-3">{counts.positive}</div>
           </button>
