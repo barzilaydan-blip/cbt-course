@@ -259,7 +259,7 @@ export default function ThoughtBasketExercise({ moduleId, existingSubmission, ba
             onClick={() => add("negative")}
             className="flex-1 max-w-[140px] bg-red-50 hover:bg-red-100 active:scale-95 border-2 border-red-200 hover:border-red-400 rounded-2xl py-5 px-2 text-center transition-all"
           >
-            <div className="text-4xl mb-2">🗑️</div>
+            <div className="text-4xl mb-2">😢</div>
             <div className="font-semibold text-red-800 text-xs leading-tight">מחשבות<br/>רעות</div>
             <div className="text-red-600 text-3xl font-bold mt-3">{counts.negative}</div>
           </button>
@@ -268,7 +268,7 @@ export default function ThoughtBasketExercise({ moduleId, existingSubmission, ba
             onClick={() => add("neutral")}
             className="flex-1 max-w-[140px] bg-slate-50 hover:bg-slate-100 active:scale-95 border-2 border-slate-200 hover:border-slate-400 rounded-2xl py-5 px-2 text-center transition-all"
           >
-            <div className="text-4xl mb-2">🧺</div>
+            <div className="text-4xl mb-2">😐</div>
             <div className="font-semibold text-slate-600 text-xs leading-tight">מחשבות<br/>ניטרליות</div>
             <div className="text-slate-600 text-3xl font-bold mt-3">{counts.neutral}</div>
           </button>
@@ -277,7 +277,7 @@ export default function ThoughtBasketExercise({ moduleId, existingSubmission, ba
             onClick={() => add("positive")}
             className="flex-1 max-w-[140px] bg-green-50 hover:bg-green-100 active:scale-95 border-2 border-green-200 hover:border-green-400 rounded-2xl py-5 px-2 text-center transition-all"
           >
-            <div className="text-4xl mb-2">✨</div>
+            <div className="text-4xl mb-2">😊</div>
             <div className="font-semibold text-green-800 text-xs leading-tight">מחשבות<br/>טובות</div>
             <div className="text-green-600 text-3xl font-bold mt-3">{counts.positive}</div>
           </button>
@@ -303,9 +303,9 @@ export default function ThoughtBasketExercise({ moduleId, existingSubmission, ba
             ולאחר מכן החזר/י את תשומת הלב לנקודה השחורה.
           </p>
           <div dir="rtl" className="flex gap-2 flex-wrap mt-3">
-            <span className="bg-red-100 text-red-800 rounded-lg px-3 py-1.5 text-xs font-medium">🗑️ מחשבות רעות — ימין</span>
-            <span className="bg-slate-200 text-slate-700 rounded-lg px-3 py-1.5 text-xs font-medium">🧺 מחשבות ניטרליות — אמצע</span>
-            <span className="bg-green-100 text-green-800 rounded-lg px-3 py-1.5 text-xs font-medium">✨ מחשבות טובות — שמאל</span>
+            <span className="bg-red-100 text-red-800 rounded-lg px-3 py-1.5 text-xs font-medium">😢 מחשבות רעות — ימין</span>
+            <span className="bg-slate-200 text-slate-700 rounded-lg px-3 py-1.5 text-xs font-medium">😐 מחשבות ניטרליות — אמצע</span>
+            <span className="bg-green-100 text-green-800 rounded-lg px-3 py-1.5 text-xs font-medium">😊 מחשבות טובות — שמאל</span>
           </div>
           <p className="text-slate-500 text-xs pt-1">
             התרגיל ימשך 2 דקות. בסיומו ישמע צליל ויופיעו שאלות רפלקציה קצרות.
