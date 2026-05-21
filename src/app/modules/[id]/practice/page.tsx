@@ -8,6 +8,7 @@ import ClinicalExercise from "@/components/practice/ClinicalExercise";
 import ExpectationsForm from "@/components/practice/ExpectationsForm";
 import CoreBeliefsGame from "@/components/practice/CoreBeliefsGame";
 import ThoughtBasketExercise from "@/components/practice/ThoughtBasketExercise";
+import SocraticExercise from "@/components/practice/SocraticExercise";
 import type { Module, ExerciseSubmission } from "@/types";
 
 export default async function PracticePage({ params }: { params: { id: string } }) {
@@ -85,6 +86,24 @@ export default async function PracticePage({ params }: { params: { id: string } 
           <p className="text-slate-500 mt-1 text-sm">זהה אמונות יסוד דרך מחשבות אוטומטיות</p>
         </div>
         <CoreBeliefsGame moduleId={module.id} userId={user.id} groupId={groupId} backHref={`/modules/${module.id}`} alreadyCompleted={alreadyCompleted} />
+      </div>
+    );
+  }
+
+  // Module 7 gets the Socratic questioning simulation
+  if (module.order_number === 7) {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-brand-900">שאלות סוקרטיות — {module.title_he}</h1>
+          <p className="text-slate-500 mt-1 text-sm">שיחה עם מטופלת בדמות AI — ערעור מחשבה אוטומטית</p>
+        </div>
+        <SocraticExercise
+          moduleId={module.id}
+          userId={user.id}
+          existingSubmission={existingSubmission as ExerciseSubmission | null}
+          backHref={`/modules/${module.id}`}
+        />
       </div>
     );
   }
