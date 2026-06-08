@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Send, CheckCircle, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import type { ExerciseSubmission } from "@/types";
 
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export default function SocraticExercise({ moduleId, existingSubmission, backHref }: Props) {
+  const router = useRouter();
   const [phase, setPhase] = useState<Phase>(existingSubmission ? "submitted" : "intro");
   const [caseOpen, setCaseOpen] = useState(true);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
@@ -108,6 +110,7 @@ export default function SocraticExercise({ moduleId, existingSubmission, backHre
       });
       if (!res.ok) throw new Error((await res.json()).error ?? "שגיאה");
       setPhase("submitted");
+      router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "שגיאה בהגשה");
     } finally {

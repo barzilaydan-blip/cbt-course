@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Clock, CheckCircle, Send } from "lucide-react";
 import type { ExerciseSubmission } from "@/types";
 
@@ -39,6 +40,7 @@ interface Props {
 type Phase = "intro" | "active" | "summary" | "submitted";
 
 export default function ThoughtBasketExercise({ moduleId, existingSubmission, backHref }: Props) {
+  const router = useRouter();
   const [phase, setPhase] = useState<Phase>(existingSubmission ? "submitted" : "intro");
   const [timeLeft, setTimeLeft] = useState(DURATION);
   const [counts, setCounts] = useState({ positive: 0, neutral: 0, negative: 0 });
@@ -94,6 +96,7 @@ export default function ThoughtBasketExercise({ moduleId, existingSubmission, ba
       if (!res.ok) throw new Error((await res.json()).error ?? "שגיאה בהגשה");
       setLastSubmitted(answers);
       setPhase("submitted");
+      router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "שגיאה לא ידועה");
     } finally {

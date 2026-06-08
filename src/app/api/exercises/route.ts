@@ -79,9 +79,13 @@ export async function POST(req: NextRequest) {
 
   // Detect form type by module order number
   const { data: moduleData } = await service.from("modules").select("order_number").eq("id", moduleId).single();
-  const isExpectationsForm = moduleData?.order_number === 1;
+  const orderNum = moduleData?.order_number ?? 0;
+  const isExpectationsForm = orderNum === 1;
+  const isClinicalExercise = orderNum === 4;
+  // Modules 1, 6, 7 (and any future self-graded exercises) auto-complete immediately
+  const autoComplete = !isClinicalExercise;
 
-  let safeAnswers: Record<string, string>;
+  let safeAnswers: Record<string, unknown>;
   if (isExpectationsForm) {
     if (!answers.background?.trim() || !answers.reason?.trim() || !answers.success?.trim()) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -93,7 +97,7 @@ export async function POST(req: NextRequest) {
       success: answers.success,
       interests: answers.interests ?? "",
     };
-  } else {
+  } else if (isClinicalExercise) {
     if (!answers.q1 || !answers.q2 || !answers.q3) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -102,6 +106,9 @@ export async function POST(req: NextRequest) {
       h1: answers.h1 ?? "", h2: answers.h2 ?? "", h3: answers.h3 ?? "",
       h4: answers.h4 ?? "", h5: answers.h5 ?? "",
     };
+  } else {
+    // Free-form exercises (modules 6, 7, …) — accept answers as-is
+    safeAnswers = answers as Record<string, unknown>;
   }
 
   const { data, error } = await service
@@ -117,8 +124,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  if (isExpectationsForm) {
-    // Mark practice as complete immediately — no admin review needed for points
+  if (autoComplete) {
+    // Mark practice as complete immediately — no admin review needed
     const { data: existing } = await service
       .from("progress")
       .select("*")

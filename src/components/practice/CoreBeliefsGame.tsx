@@ -259,7 +259,7 @@ export default function CoreBeliefsGame({ moduleId, userId, groupId, backHref, a
       await fetch("/api/progress", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, moduleId, practice_completed: true }),
+        body: JSON.stringify({ userId, moduleId, field: "practice_completed", value: true }),
       });
       setSaving(false);
       playWin();
