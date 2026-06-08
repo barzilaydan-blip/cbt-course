@@ -203,6 +203,8 @@ export default function LessonActivityBar({
                   ? "משחק מיון"
                   : module.order_number === 4
                   ? "תרגיל קליני"
+                  : module.order_number === 6
+                  ? "תרגיל מיינדפולנס"
                   : "תרגול עם AI"}
               </h3>
               <p className="text-sm text-slate-500 leading-relaxed">
@@ -212,6 +214,8 @@ export default function LessonActivityBar({
                   ? "התאם כל פריט לקטגוריה הנכונה על פי המודל הקוגניטיבי — כ־15 דקות"
                   : module.order_number === 4
                   ? "ניתוח מקרה קליני — שלח למרצה לבדיקה ומשוב"
+                  : module.order_number === 6
+                  ? "תרגיל לפיתוח הערנות לזיהוי מחשבות אוטומטיות (משך — 3 דקות)"
                   : "שיחת תרגול עם סופרוויזר AI ומשוב אישי — כ־15 דקות"}
               </p>
             </div>

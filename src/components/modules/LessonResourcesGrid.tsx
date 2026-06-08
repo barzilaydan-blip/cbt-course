@@ -52,6 +52,8 @@ export default function LessonResourcesGrid({
       ? "משחק מיון"
       : module.order_number === 4
       ? "תרגיל קליני"
+      : module.order_number === 6
+      ? "תרגיל מיינדפולנס"
       : "תרגול עם AI";
 
   const practiceDescription =
@@ -59,6 +61,8 @@ export default function LessonResourcesGrid({
       ? "התאם כל פריט לקטגוריה הנכונה"
       : module.order_number === 4
       ? "ניתוח מקרה קליני — שלח למרצה לבדיקה"
+      : module.order_number === 6
+      ? "תרגיל לפיתוח הערנות לזיהוי מחשבות אוטומטיות"
       : "שיחת תרגול עם סופרוויזר AI ומשוב אישי";
 
   const practiceCompleted =
@@ -133,7 +137,7 @@ export default function LessonResourcesGrid({
         iconColor="text-teal-600"
         title={practiceTitle}
         description={practiceDescription}
-        duration="~15 דק' תרגול"
+        duration={module.order_number === 6 ? "~3 דקות" : "~15 דק' תרגול"}
         isCompleted={practiceCompleted}
         completedLabel={practiceLabel}
         href={`/modules/${moduleId}/practice`}
