@@ -205,6 +205,8 @@ export default function LessonActivityBar({
                   ? "תרגיל קליני"
                   : module.order_number === 6
                   ? "תרגיל מיינדפולנס"
+                  : module.order_number === 9
+                  ? "בניית המשגה קלינית"
                   : "תרגול עם AI"}
               </h3>
               <p className="text-sm text-slate-500 leading-relaxed">
@@ -216,6 +218,8 @@ export default function LessonActivityBar({
                   ? "ניתוח מקרה קליני — שלח למרצה לבדיקה ומשוב"
                   : module.order_number === 6
                   ? "תרגיל לפיתוח הערנות לזיהוי מחשבות אוטומטיות (משך — 3 דקות)"
+                  : module.order_number === 9
+                  ? "מילוי שדות המשגה מלאים, ולאחר ההגשה — יצירת היפותזת עבודה בעזרת AI"
                   : "שיחת תרגול עם סופרוויזר AI ומשוב אישי — כ־15 דקות"}
               </p>
             </div>
