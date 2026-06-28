@@ -4,41 +4,46 @@ import { useRouter } from "next/navigation";
 import { Sparkles, Send, CheckCircle, Loader2 } from "lucide-react";
 import type { ExerciseSubmission } from "@/types";
 
-const FIELD_KEYS = [
-  "background", "core_beliefs", "intermediate_beliefs",
-  "triggers",
-  "automatic_thoughts", "cognitive_distortions", "attentional_biases", "cognitive_awareness",
-  "emotions_typical", "emotional_awareness", "emotion_regulation",
-  "physical_sensations", "body_awareness", "sensation_triggers", "somatic_regulation",
-  "behaviors_typical",
-  "environmental_response", "missing_skills", "vicious_cycle",
-  "strengths", "treatment_goals",
-] as const;
-
-type FieldKey = typeof FIELD_KEYS[number];
-type FormData = Record<FieldKey, string>;
-
-const EMPTY_DATA: FormData = FIELD_KEYS.reduce((acc, k) => ({ ...acc, [k]: "" }), {} as FormData);
-
-const REQUIRED_FIELDS: FieldKey[] = [
-  "background", "core_beliefs", "intermediate_beliefs", "triggers",
-  "automatic_thoughts", "behaviors_typical", "vicious_cycle", "treatment_goals",
+const COGNITIVE_DISTORTIONS = [
+  "קריאת מחשבות", "ניבוי עתיד", "קטסטרופיזציה", "תיוג", "פילטר שלילי",
+  "הנחה/הכחשה של החיובי", "הכללת יתר", "חשיבה דיכוטומית",
+  "דרישות — צריך/חייב", "אישיות יתר", "האשמה", "השוואות בלתי-הוגנות",
+  "מחשבות מה-אם", "הגיון רגשי", "אי-קבלת הוכחות נגד",
 ];
 
-const FIELD_LABELS: Record<FieldKey, string> = {
+const TEXT_FIELD_KEYS = [
+  "background", "core_beliefs", "intermediate_beliefs",
+  "triggers",
+  "automatic_thoughts", "attentional_biases", "cognitive_awareness",
+  "emotions_typical", "emotion_regulation",
+  "physical_sensations", "sensation_triggers", "somatic_regulation",
+  "behaviors_typical",
+  "environmental_response", "missing_skills", "vicious_cycle",
+  "strengths",
+  "own_hypothesis",
+] as const;
+
+type TextFieldKey = typeof TEXT_FIELD_KEYS[number];
+type TextFormData = Record<TextFieldKey, string>;
+
+const EMPTY_TEXT_DATA: TextFormData = TEXT_FIELD_KEYS.reduce((acc, k) => ({ ...acc, [k]: "" }), {} as TextFormData);
+
+const REQUIRED_FIELDS: TextFieldKey[] = [
+  "background", "core_beliefs", "intermediate_beliefs", "triggers",
+  "automatic_thoughts", "behaviors_typical", "vicious_cycle", "own_hypothesis",
+];
+
+const FIELD_LABELS: Record<TextFieldKey, string> = {
   background: "רקע והתפתחות הבעיה",
   core_beliefs: "אמונות יסוד",
   intermediate_beliefs: "אמונות ביניים",
   triggers: "טריגרים פנימיים וחיצוניים",
   automatic_thoughts: "מחשבות אוטומטיות",
-  cognitive_distortions: "עיוותי חשיבה",
   attentional_biases: "הטיות קשב",
   cognitive_awareness: "מודעות וגמישות מחשבתית",
   emotions_typical: "רגשות טיפוסיים וטווח רגשי",
-  emotional_awareness: "מודעות רגשית",
   emotion_regulation: "ויסות רגשי",
   physical_sensations: "תחושות גופניות מלוות",
-  body_awareness: "מודעות לקשר גוף-רגש",
   sensation_triggers: "תזמון והופעת התחושות, עוצמתן וחשש מהן",
   somatic_regulation: "ויסות והרגעה גופנית",
   behaviors_typical: "דפוסי התנהגות טיפוסיים",
@@ -46,7 +51,7 @@ const FIELD_LABELS: Record<FieldKey, string> = {
   missing_skills: "מיומנויות חסרות",
   vicious_cycle: "מעגל השימור וההנצחה",
   strengths: "חוזקות",
-  treatment_goals: "מטרות טיפול (מודל SMART)",
+  own_hypothesis: "היפותזת העבודה שלי",
 };
 
 interface Props {
@@ -58,21 +63,35 @@ interface Props {
 
 export default function CaseFormulationExercise({ moduleId, existingSubmission, backHref }: Props) {
   const router = useRouter();
-  const [data, setData] = useState<FormData>(() => {
-    if (!existingSubmission) return EMPTY_DATA;
-    const a = existingSubmission.answers as Partial<FormData>;
-    return FIELD_KEYS.reduce((acc, k) => ({ ...acc, [k]: a[k] ?? "" }), {} as FormData);
+  const existingAnswers = existingSubmission?.answers as Record<string, unknown> | undefined;
+
+  const [data, setData] = useState<TextFormData>(() => {
+    if (!existingAnswers) return EMPTY_TEXT_DATA;
+    return TEXT_FIELD_KEYS.reduce((acc, k) => ({ ...acc, [k]: (existingAnswers[k] as string) ?? "" }), {} as TextFormData);
   });
+  const [distortions, setDistortions] = useState<string[]>(
+    Array.isArray(existingAnswers?.cognitive_distortions) ? existingAnswers.cognitive_distortions as string[] : []
+  );
+  const [emotionalAwareness, setEmotionalAwareness] = useState<number>(
+    typeof existingAnswers?.emotional_awareness === "number" ? existingAnswers.emotional_awareness : 5
+  );
+  const [bodyAwareness, setBodyAwareness] = useState<number>(
+    typeof existingAnswers?.body_awareness === "number" ? existingAnswers.body_awareness : 5
+  );
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(!!existingSubmission);
   const [error, setError] = useState("");
   const [generating, setGenerating] = useState(false);
   const [narrative, setNarrative] = useState<string>(
-    (existingSubmission?.answers as Record<string, string> | undefined)?.ai_formulation_he ?? ""
+    (existingAnswers?.ai_formulation_he as string | undefined) ?? ""
   );
 
-  function update(key: FieldKey, value: string) {
+  function update(key: TextFieldKey, value: string) {
     setData(prev => ({ ...prev, [key]: value }));
+  }
+
+  function toggleDistortion(d: string) {
+    setDistortions(prev => (prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d]));
   }
 
   const missingRequired = REQUIRED_FIELDS.filter(k => !data[k].trim());
@@ -85,10 +104,16 @@ export default function CaseFormulationExercise({ moduleId, existingSubmission, 
     setSubmitting(true);
     setError("");
     try {
+      const answers = {
+        ...data,
+        cognitive_distortions: distortions,
+        emotional_awareness: emotionalAwareness,
+        body_awareness: bodyAwareness,
+      };
       const res = await fetch("/api/exercises", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ moduleId, answers: data }),
+        body: JSON.stringify({ moduleId, answers }),
       });
       if (!res.ok) throw new Error((await res.json()).error ?? "שגיאה בהגשה");
       setSubmitted(true);
@@ -120,7 +145,7 @@ export default function CaseFormulationExercise({ moduleId, existingSubmission, 
     }
   }
 
-  function field(key: FieldKey, placeholder = "", rows = 3) {
+  function field(key: TextFieldKey, placeholder = "", rows = 3) {
     const isRequired = REQUIRED_FIELDS.includes(key);
     return (
       <div>
@@ -136,6 +161,28 @@ export default function CaseFormulationExercise({ moduleId, existingSubmission, 
           disabled={submitted}
           className="input-he resize-none disabled:bg-slate-50 disabled:text-slate-600"
         />
+      </div>
+    );
+  }
+
+  function scaleField(label: string, value: number, onChange: (v: number) => void) {
+    return (
+      <div>
+        <label className="block text-sm font-semibold text-brand-900 mb-1.5">{label}</label>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-slate-400 shrink-0">נמוכה</span>
+          <input
+            type="range"
+            min={1}
+            max={10}
+            value={value}
+            onChange={e => onChange(Number(e.target.value))}
+            disabled={submitted}
+            className="flex-1 accent-brand-500 disabled:opacity-50"
+          />
+          <span className="text-xs text-slate-400 shrink-0">גבוהה</span>
+          <span className="w-7 text-center text-sm font-bold text-brand-700 shrink-0">{value}</span>
+        </div>
       </div>
     );
   }
@@ -170,11 +217,17 @@ export default function CaseFormulationExercise({ moduleId, existingSubmission, 
               {generating ? "כותב..." : narrative ? "צור מחדש" : "בקש מה-AI לכתוב את ההמשגה"}
             </button>
           </div>
+          {generating && (
+            <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3 flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+              ה-AI כותב את ההיפותזה — זה עשוי לקחת כ-20–40 שניות, אנא המתינו ואל תרעננו את הדף.
+            </p>
+          )}
           {narrative ? (
             <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">{narrative}</p>
-          ) : (
+          ) : !generating ? (
             <p className="text-sm text-slate-400">לא נוצרה היפותזה עדיין — לחץ על הכפתור כדי לבקש מה-AI לכתוב אותה על סמך הנתונים שמילאת.</p>
-          )}
+          ) : null}
         </div>
 
         {error && (
@@ -184,7 +237,25 @@ export default function CaseFormulationExercise({ moduleId, existingSubmission, 
         {/* Read-only data */}
         <div className="bg-slate-50 rounded-2xl border border-slate-200 p-5 space-y-4">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">הנתונים שמילאת</p>
-          {FIELD_KEYS.map(k => data[k] && (
+          {distortions.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-brand-700 mb-1">עיוותי חשיבה</p>
+              <p className="text-sm text-slate-700 leading-relaxed bg-white rounded-xl border border-slate-100 px-4 py-3">
+                {distortions.join(", ")}
+              </p>
+            </div>
+          )}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs font-semibold text-brand-700 mb-1">מודעות רגשית</p>
+              <p className="text-sm text-slate-700 bg-white rounded-xl border border-slate-100 px-4 py-3">{emotionalAwareness}/10</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-brand-700 mb-1">מודעות לקשר גוף-רגש</p>
+              <p className="text-sm text-slate-700 bg-white rounded-xl border border-slate-100 px-4 py-3">{bodyAwareness}/10</p>
+            </div>
+          </div>
+          {TEXT_FIELD_KEYS.map(k => data[k] && (
             <div key={k}>
               <p className="text-xs font-semibold text-brand-700 mb-1">{FIELD_LABELS[k]}</p>
               <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap bg-white rounded-xl border border-slate-100 px-4 py-3">
@@ -220,9 +291,31 @@ export default function CaseFormulationExercise({ moduleId, existingSubmission, 
 
       <section className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
         <h2 className="text-base font-bold text-brand-900 border-b border-slate-100 pb-3">🧠 חוויה קוגניטיבית</h2>
+        <div>
+          <label className="block text-sm font-semibold text-brand-900 mb-1.5">עיוותי חשיבה</label>
+          <div className="flex flex-wrap gap-2">
+            {COGNITIVE_DISTORTIONS.map(d => {
+              const active = distortions.includes(d);
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => toggleDistortion(d)}
+                  disabled={submitted}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all disabled:opacity-60 ${
+                    active
+                      ? "bg-brand-500 text-white border-brand-500"
+                      : "bg-white text-slate-600 border-slate-300 hover:border-brand-400"
+                  }`}
+                >
+                  {active ? "✓ " : ""}{d}
+                </button>
+              );
+            })}
+          </div>
+        </div>
         <div className="grid md:grid-cols-2 gap-4">
           {field("automatic_thoughts", "מחשבות אוטומטיות אופייניות...")}
-          {field("cognitive_distortions", "עיוותי חשיבה בולטים...")}
           {field("attentional_biases", "הטיות קשב...")}
           {field("cognitive_awareness", "מודעות למחשבות, רמת הזדהות, גמישות מחשבתית...")}
         </div>
@@ -230,18 +323,18 @@ export default function CaseFormulationExercise({ moduleId, existingSubmission, 
 
       <section className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
         <h2 className="text-base font-bold text-brand-900 border-b border-slate-100 pb-3">💛 חוויה רגשית</h2>
+        {scaleField("מודעות רגשית (הבחנה בין רגשות, זיהוי אצל עצמו ואחרים)", emotionalAwareness, setEmotionalAwareness)}
         <div className="grid md:grid-cols-2 gap-4">
           {field("emotions_typical", "רגשות טיפוסיים וטווח רגשי...")}
-          {field("emotional_awareness", "מודעות רגשית, הבחנה בין רגשות...")}
           {field("emotion_regulation", "עוצמה, משך, לאביליות, יכולת מיתון...")}
         </div>
       </section>
 
       <section className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
         <h2 className="text-base font-bold text-brand-900 border-b border-slate-100 pb-3">💪 חוויה גופנית (תחושות)</h2>
+        {scaleField("מודעות לקשר גוף-רגש (שיום תחושות)", bodyAwareness, setBodyAwareness)}
         <div className="grid md:grid-cols-2 gap-4">
           {field("physical_sensations", "תחושות גופניות המלוות את הטריגרים...")}
-          {field("body_awareness", "מודעות לקשר גוף-רגש, שיום תחושות...")}
           {field("sensation_triggers", "תזמון הופעה, עוצמה, חשש מעצם התחושה...")}
           {field("somatic_regulation", "יכולת ויסות והרגעה גופנית...")}
         </div>
@@ -260,11 +353,17 @@ export default function CaseFormulationExercise({ moduleId, existingSubmission, 
       </section>
 
       <section className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-        <h2 className="text-base font-bold text-brand-900 border-b border-slate-100 pb-3">🌱 משאבים ומטרות</h2>
-        <div className="grid md:grid-cols-2 gap-4">
-          {field("strengths", "חוזקות — מוטיבציה, מודעות עצמית...")}
-          {field("treatment_goals", "מטרות טיפול על פי מודל SMART...")}
-        </div>
+        <h2 className="text-base font-bold text-brand-900 border-b border-slate-100 pb-3">🌱 משאבים</h2>
+        {field("strengths", "חוזקות — מוטיבציה, מודעות עצמית...")}
+      </section>
+
+      <section className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+        <h2 className="text-base font-bold text-brand-900 border-b border-slate-100 pb-3">✍️ היפותזת העבודה שלי</h2>
+        {field(
+          "own_hypothesis",
+          "כתבו בעצמכם ניסוח כתוב של היפותזת העבודה: כיצד התגבשו אמונות היסוד והביניים, וכיצד אלו הובילו לסכמה המופעלת על ידי הטריגרים ויוצרת את הדפוס המשותת על מחשבות, רגשות, תחושות והתנהגות. כיצד הסביבה משמרת את הדפוס וכיצד הוא מתוחזק בכל התנסות...",
+          6
+        )}
       </section>
 
       {error && (

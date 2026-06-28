@@ -21,8 +21,8 @@ const FORMULATION_SYSTEM = `אתה פסיכולוג קליני מומחה וסו
 4. מעגל השימור וההנצחה (סעיף קריטי):
 זוהי ליבת ההיפותזה. תאר את מעגל ההזנה השלילי: כיצד ההתמודדות ההתנהגותית של המטופל (הימנעות, פיצוי יתר, התנהגויות ביטחון) והמיומנויות החסרות הספציפיות שלו (כגון תפקוד ניהולי, ויסות רגשי, או מיומנויות בין-אישיות) מעוררות תגובות סביבתיות אשר בסופו של דבר "מוכיחות" ומחזקות את אמונות היסוד שלו.
 
-5. כיווני עבודה ומטרות:
-מפה בקצרה כיצד החוזקות הנוכחיות של המטופל ינוצלו לבניית המיומנויות החסרות ולהשגת מטרות הטיפול הספציפיות (SMART) שהוגדרו.
+5. כיווני עבודה:
+מפה בקצרה כיצד החוזקות הנוכחיות של המטופל עשויות לסייע בבניית המיומנויות החסרות ובפריצת מעגל ההנצחה שתואר לעיל.
 
 סגנון וטון:
 - השתמש בעברית קלינית מקצועית, אמפתית ומדויקת.
@@ -51,7 +51,6 @@ const FIELD_LABELS: Record<string, string> = {
   missing_skills: "מיומנויות חסרות",
   vicious_cycle: "מעגל השימור וההנצחה",
   strengths: "חוזקות",
-  treatment_goals: "מטרות טיפול (מודל SMART)",
 };
 
 export async function POST(req: NextRequest) {
@@ -74,15 +73,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "לא נמצאה הגשת המשגה למפגש זה" }, { status: 404 });
   }
 
-  const answers = submission.answers as Record<string, string>;
+  const answers = submission.answers as Record<string, unknown>;
+
+  function formatValue(key: string): string {
+    const value = answers[key];
+    if (key === "cognitive_distortions") {
+      return Array.isArray(value) && value.length > 0 ? value.join(", ") : "לא צוין";
+    }
+    if (key === "emotional_awareness" || key === "body_awareness") {
+      return typeof value === "number" ? `${value}/10` : "לא צוין";
+    }
+    return typeof value === "string" && value.trim() ? value.trim() : "לא צוין";
+  }
+
   const dataText = Object.entries(FIELD_LABELS)
-    .map(([key, label]) => `${label}: ${answers[key]?.trim() || "לא צוין"}`)
+    .map(([key, label]) => `${label}: ${formatValue(key)}`)
     .join("\n\n");
 
   try {
     const response = await anthropic.messages.create({
       model: "claude-opus-4-6",
-      max_tokens: 3000,
+      max_tokens: 8000,
       system: FORMULATION_SYSTEM,
       messages: [{ role: "user", content: `נתוני המטופל:\n\n${dataText}` }],
     });
