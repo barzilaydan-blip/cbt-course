@@ -74,6 +74,7 @@ export interface Module {
   meeting_date: string | null;
   access_mode: "locked" | "open" | "auto";
   is_published: boolean;
+  is_async: boolean;
   created_at: string;
 }
 
