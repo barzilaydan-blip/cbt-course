@@ -69,6 +69,7 @@ export default function QuizEngine({ module, quiz, userId }: Props) {
         field: "quiz",
         quiz_score: score,
         quiz_completed: true,
+        quiz_answers: finalAnswers,
       }),
     });
     setSaving(false);

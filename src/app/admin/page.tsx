@@ -142,6 +142,7 @@ export default async function AdminPage() {
           { href: "/admin/exercises", icon: ClipboardList, label: "תרגילים קליניים", desc: "בדוק הגשות ותן משוב לסטודנטים", color: "bg-rose-50 text-rose-600", badge: pendingExercisesCount },
           { href: "/admin/settings", icon: SlidersHorizontal, label: "הגדרות קורס", desc: "Zoom, סילבוס, יום ושעת מפגשים", color: "bg-slate-50 text-slate-600", badge: 0 },
           { href: "/admin/activity", icon: Activity, label: "מעקב נוכחות", desc: "זמני כניסה ושהייה של סטודנטים", color: "bg-green-50 text-green-600", badge: 0 },
+          { href: "/admin/quiz-stats", icon: BarChart3, label: "ניתוח חידונים", desc: "שאלות שמעל 50% ענו בצורה שגויה", color: "bg-amber-50 text-amber-600", badge: 0 },
         ].map(({ href, icon: Icon, label, desc, color, badge }) => (
           <Link
             key={href}

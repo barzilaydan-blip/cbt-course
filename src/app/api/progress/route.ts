@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    const { moduleId, userId, field, value, quiz_score, quiz_completed } = body;
+    const { moduleId, userId, field, value, quiz_score, quiz_completed, quiz_answers } = body;
 
     // Build the update patch
     const patch: Record<string, unknown> = {
@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
     if (field === "quiz") {
       patch.quiz_completed = quiz_completed;
       patch.quiz_score = quiz_score;
+      if (quiz_answers !== undefined) patch.quiz_answers = quiz_answers;
     } else {
       patch[field] = value;
     }

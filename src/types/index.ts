@@ -108,6 +108,7 @@ export interface Progress {
   article_read: boolean;
   quiz_completed: boolean;
   quiz_score: number | null;
+  quiz_answers: number[] | null;
   practice_completed: boolean;
   exercise_points: number;
   points_earned: number;
