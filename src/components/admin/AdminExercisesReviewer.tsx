@@ -43,7 +43,12 @@ interface SubmissionWithProfile extends ExerciseSubmission {
   modules?: { order_number: number; title_he: string } | null;
 }
 
+const REVIEW_MODULES = [1, 4, 9]; // only these go to the instructor
+
 export default function AdminExercisesReviewer({ submissions }: { submissions: SubmissionWithProfile[] }) {
+  // Filter to only submissions that require instructor review
+  const reviewable = submissions.filter(s => REVIEW_MODULES.includes(s.modules?.order_number ?? 0));
+
   const [filter, setFilter] = useState<"all" | "submitted" | "reviewed">("submitted");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [feedbacks, setFeedbacks] = useState<Record<string, string>>({});
@@ -52,7 +57,7 @@ export default function AdminExercisesReviewer({ submissions }: { submissions: S
   const [done, setDone] = useState<Set<string>>(new Set());
   const [copied, setCopied] = useState<string | null>(null);
 
-  const filtered = submissions.filter(s =>
+  const filtered = reviewable.filter(s =>
     filter === "all" ? true : s.status === filter
   );
 
@@ -98,7 +103,7 @@ export default function AdminExercisesReviewer({ submissions }: { submissions: S
     setTimeout(() => setCopied(null), 2000);
   }
 
-  const pendingCount = submissions.filter(s => s.status === "submitted").length;
+  const pendingCount = reviewable.filter(s => s.status === "submitted").length;
 
   return (
     <div className="space-y-4">
