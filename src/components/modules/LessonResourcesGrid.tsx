@@ -56,6 +56,8 @@ export default function LessonResourcesGrid({
       ? "תרגיל מיינדפולנס"
       : module.order_number === 9
       ? "בניית המשגה קלינית"
+      : module.order_number === 10
+      ? "נווט הדאגה"
       : "תרגול עם AI";
 
   const practiceDescription =
@@ -67,6 +69,8 @@ export default function LessonResourcesGrid({
       ? "תרגיל לפיתוח הערנות לזיהוי מחשבות אוטומטיות"
       : module.order_number === 9
       ? "מילוי שדות המשגה + יצירת היפותזת עבודה בעזרת AI"
+      : module.order_number === 10
+      ? "תרשים החלטה טיפולי אינטראקטיבי לטיפול בדאגנות יתר"
       : "שיחת תרגול עם סופרוויזר AI ומשוב אישי";
 
   const practiceCompleted =

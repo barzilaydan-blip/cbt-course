@@ -10,6 +10,7 @@ import CoreBeliefsGame from "@/components/practice/CoreBeliefsGame";
 import ThoughtBasketExercise from "@/components/practice/ThoughtBasketExercise";
 import SocraticExercise from "@/components/practice/SocraticExercise";
 import CaseFormulationExercise from "@/components/practice/CaseFormulationExercise";
+import WorryNavigatorExercise from "@/components/practice/WorryNavigatorExercise";
 import type { Module, ExerciseSubmission } from "@/types";
 
 export default async function PracticePage({ params }: { params: { id: string } }) {
@@ -103,6 +104,21 @@ export default async function PracticePage({ params }: { params: { id: string } 
           moduleId={module.id}
           userId={user.id}
           existingSubmission={existingSubmission as ExerciseSubmission | null}
+          backHref={`/modules/${module.id}`}
+        />
+      </div>
+    );
+  }
+
+  // Module 10 gets the Worry Navigator exercise
+  if (module.order_number === 10) {
+    const alreadyCompleted = progress?.practice_completed === true;
+    return (
+      <div className="max-w-2xl mx-auto">
+        <WorryNavigatorExercise
+          moduleId={module.id}
+          userId={user.id}
+          alreadyCompleted={alreadyCompleted}
           backHref={`/modules/${module.id}`}
         />
       </div>
