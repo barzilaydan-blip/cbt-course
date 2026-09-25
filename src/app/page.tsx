@@ -70,24 +70,24 @@ function LoginPageInner() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-900 via-brand-700 to-brand-500 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-2xl mb-4">
-            <BookOpen className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-500 rounded-2xl mb-4">
+            <BookOpen className="w-8 h-8 text-white" aria-hidden="true" />
           </div>
-          <h1 className="text-3xl font-bold text-white">קורס CBT</h1>
-          <p className="text-blue-200 mt-2 text-sm">טיפול קוגניטיבי-התנהגותי — 12 מפגשים</p>
+          <h1 className="text-3xl font-bold text-brand-900">קורס CBT</h1>
+          <p className="text-slate-600 mt-2">טיפול קוגניטיבי-התנהגותי — 12 מפגשים</p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-lift p-6 sm:p-8">
           {/* Google Login Button */}
           <button
             onClick={handleGoogleLogin}
             disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 border-2 border-slate-200 hover:border-brand-400 hover:bg-brand-50 text-slate-700 font-semibold py-3 rounded-xl transition-all mb-5 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 min-h-[48px] border border-slate-300 hover:border-brand-400 hover:bg-brand-50 text-slate-800 font-semibold py-3 rounded-lg transition-colors mb-5 disabled:opacity-50"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -102,25 +102,29 @@ function LoginPageInner() {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-slate-200" />
             </div>
-            <div className="relative flex justify-center text-xs text-slate-400">
+            <div className="relative flex justify-center text-sm text-slate-600">
               <span className="bg-white px-3">או</span>
             </div>
           </div>
 
           {/* Tabs */}
-          <div className="flex rounded-lg bg-slate-100 p-1 mb-6">
+          <div role="tablist" aria-label="סוג כניסה" className="flex rounded-lg bg-slate-100 p-1 mb-6">
             <button
+              role="tab"
+              aria-selected={mode === "login"}
               onClick={() => { setMode("login"); setError(""); }}
-              className={`flex-1 py-2 rounded-md text-sm font-semibold transition-colors ${
-                mode === "login" ? "bg-white shadow text-brand-900" : "text-slate-600 hover:text-brand-700"
+              className={`flex-1 min-h-[40px] rounded-md text-sm font-semibold transition-colors ${
+                mode === "login" ? "bg-white shadow-card text-brand-900" : "text-slate-600 hover:text-brand-700"
               }`}
             >
               כניסה
             </button>
             <button
+              role="tab"
+              aria-selected={mode === "register"}
               onClick={() => { setMode("register"); setError(""); }}
-              className={`flex-1 py-2 rounded-md text-sm font-semibold transition-colors ${
-                mode === "register" ? "bg-white shadow text-brand-900" : "text-slate-600 hover:text-brand-700"
+              className={`flex-1 min-h-[40px] rounded-md text-sm font-semibold transition-colors ${
+                mode === "register" ? "bg-white shadow-card text-brand-900" : "text-slate-600 hover:text-brand-700"
               }`}
             >
               הרשמה
@@ -130,7 +134,7 @@ function LoginPageInner() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "register" && (
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">שם מלא</label>
+                <label className="label-he">שם מלא</label>
                 <input
                   type="text"
                   value={name}
@@ -143,7 +147,7 @@ function LoginPageInner() {
             )}
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">אימייל</label>
+              <label className="label-he">אימייל</label>
               <input
                 type="email"
                 value={email}
@@ -156,7 +160,7 @@ function LoginPageInner() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">סיסמה</label>
+              <label className="label-he">סיסמה</label>
               <div className="relative">
                 <input
                   type={showPwd ? "text" : "password"}
@@ -171,18 +175,19 @@ function LoginPageInner() {
                 <button
                   type="button"
                   onClick={() => setShowPwd(!showPwd)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  aria-label={showPwd ? "הסתר סיסמה" : "הצג סיסמה"}
+                  className="absolute left-1 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 >
-                  {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPwd ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className={`text-sm rounded-lg px-4 py-3 ${
+              <div role="alert" className={`text-sm rounded-lg px-4 py-3 ${
                 error.includes("אימייל אימות")
-                  ? "bg-green-50 text-green-700 border border-green-200"
-                  : "bg-red-50 text-red-600 border border-red-200"
+                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                  : "bg-red-50 text-red-800 border border-red-200"
               }`}>
                 {error}
               </div>
@@ -198,7 +203,7 @@ function LoginPageInner() {
           </form>
         </div>
 
-        <p className="text-center text-blue-200/60 text-xs mt-6">
+        <p className="text-center text-slate-600 text-xs mt-6">
           מבוסס על Leahy (2017) — Cognitive Therapy Techniques
         </p>
       </div>

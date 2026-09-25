@@ -228,7 +228,7 @@ export default function AdminExercisesReviewer({ submissions }: { submissions: S
                       <p className="text-xs font-semibold text-brand-700 mb-2">שאלה 4 — מדרג חשיפה</p>
                       <div className="overflow-hidden rounded-xl border border-slate-200">
                         <table className="w-full text-sm">
-                          <thead className="bg-brand-900 text-white">
+                          <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                             <tr>
                               <th className="px-3 py-2 text-right font-semibold w-14">שלב</th>
                               <th className="px-3 py-2 text-right font-semibold">תיאור פעולת החשיפה</th>

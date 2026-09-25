@@ -14,7 +14,7 @@ export default async function ResourcesLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar profile={profile as Profile | null} />
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-8">{children}</main>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-8">{children}</main>
       {profile?.role === "student" && (
         <AskLecturerButton userId={profile.id} groupId={profile.group_id ?? null} />
       )}

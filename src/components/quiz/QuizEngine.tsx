@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CheckCircle, XCircle, ChevronLeft, Trophy } from "lucide-react";
 import type { Module, Quiz, QuizQuestion } from "@/types";
 import { cn } from "@/lib/utils";
+import { ProgressBar } from "@/components/ui/ProgressBar";
 
 interface Props {
   module: Module;
@@ -110,9 +111,9 @@ export default function QuizEngine({ module, quiz, userId }: Props) {
                 {!isCorrect && userAns !== null && (
                   <p className="text-sm text-red-600 mb-1">תשובתך: {question.options_he[userAns]}</p>
                 )}
-                <p className="text-sm text-green-700 font-medium">✓ תשובה נכונה: {question.options_he[question.correct_index]}</p>
+                <p className="text-sm text-emerald-800 font-medium">תשובה נכונה: {question.options_he[question.correct_index]}</p>
                 {question.explanation_he && (
-                  <p className="text-sm text-slate-600 mt-2 bg-slate-50 rounded-lg p-3">{question.explanation_he}</p>
+                  <p className="text-sm text-slate-700 mt-2 bg-slate-50 rounded-lg p-3 leading-relaxed">{question.explanation_he}</p>
                 )}
               </div>
             );
@@ -133,45 +134,42 @@ export default function QuizEngine({ module, quiz, userId }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <Link href={`/modules/${module.id}`} className="text-sm text-slate-500 hover:text-brand-500 flex items-center gap-1">
+          <Link href={`/modules/${module.id}`} className="text-sm text-slate-600 hover:text-brand-700 flex items-center gap-1 min-h-[44px]">
             <ChevronLeft className="w-4 h-4 rotate-180" />
             חזור למפגש
           </Link>
           <h1 className="text-xl font-bold text-brand-900 mt-1">בחן את עצמך — מפגש {module.order_number}</h1>
         </div>
-        <span className="text-sm font-semibold text-slate-500">
+        <span className="text-sm font-semibold text-slate-700" aria-label={`שאלה ${current + 1} מתוך ${questions.length}`}>
           {current + 1} / {questions.length}
         </span>
       </div>
 
       {/* Progress bar */}
-      <div className="bg-slate-100 rounded-full h-2">
-        <div
-          className="bg-brand-500 h-2 rounded-full transition-all duration-300"
-          style={{ width: `${((current) / questions.length) * 100}%` }}
-        />
-      </div>
+      <ProgressBar value={(current / questions.length) * 100} label="התקדמות בחידון" />
 
       {/* Question card */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-        <p className="text-lg font-semibold text-slate-800 mb-6 leading-relaxed">{q.question_he}</p>
+      <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-7 shadow-card">
+        <p id="quiz-question" className="text-lg font-semibold text-slate-900 mb-6 leading-relaxed">{q.question_he}</p>
 
-        <div className="space-y-3">
+        <div role="radiogroup" aria-labelledby="quiz-question" className="space-y-3">
           {q.options_he.map((opt, idx) => (
             <button
               key={idx}
               onClick={() => handleSelect(idx)}
+              role="radio"
+              aria-checked={selected === idx}
               className={cn(
-                "w-full text-right p-4 rounded-xl border-2 transition-all font-medium text-sm",
+                "w-full text-right p-4 min-h-[56px] rounded-xl border-2 transition-colors font-medium text-base leading-relaxed",
                 selected === idx
                   ? "border-brand-500 bg-brand-50 text-brand-900"
-                  : "border-slate-200 hover:border-slate-300 text-slate-700 bg-white"
+                  : "border-slate-200 hover:border-brand-300 text-slate-800 bg-white"
               )}
             >
               <span className="inline-flex items-center gap-3">
                 <span className={cn(
-                  "w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold shrink-0",
-                  selected === idx ? "border-brand-500 bg-brand-500 text-white" : "border-slate-300 text-slate-400"
+                  "w-7 h-7 rounded-full border-2 flex items-center justify-center text-sm font-bold shrink-0",
+                  selected === idx ? "border-brand-500 bg-brand-500 text-white" : "border-slate-300 text-slate-600"
                 )}>
                   {String.fromCharCode(1488 + idx)}
                 </span>

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Trophy, RotateCcw, ChevronRight, GripVertical } from "lucide-react";
+import { CheckCircle, Trophy, RotateCcw, ChevronRight, GripVertical, Lightbulb } from "lucide-react";
 import Link from "next/link";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -203,17 +203,17 @@ export default function MatchingGame({ moduleId, userId, backHref, alreadyComple
     <div dir="rtl" className="space-y-5">
 
       {/* Case study */}
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">מקרה קליני — רונן</p>
-        <p className="text-sm text-slate-200 leading-relaxed">{CASE_STUDY}</p>
+      <div className="bg-white border border-slate-200 shadow-card rounded-xl p-5">
+        <p className="text-xs font-bold text-slate-600 mb-2">מקרה קליני — רונן</p>
+        <p className="prose-he">{CASE_STUDY}</p>
       </div>
 
       {/* Instructions */}
       {!allDone && (
-        <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-3 flex items-start gap-2">
-          <span className="text-blue-400 mt-0.5 shrink-0">💡</span>
-          <p className="text-sm text-blue-300 leading-relaxed">
-            <span className="font-semibold">הוראות:</span> גרור כל מושג מהטור הימני ושחרר אותו על הפרט המתאים בטור השמאלי. התיאבון לא יורד כשמנסים שוב! 🙂
+        <div className="bg-brand-50 border border-brand-100 rounded-xl px-4 py-3 flex items-start gap-2">
+          <Lightbulb className="w-4 h-4 text-brand-600 mt-1 shrink-0" aria-hidden="true" />
+          <p className="text-sm text-brand-900 leading-relaxed">
+            <span className="font-semibold">הוראות:</span> גרור כל מושג מהטור הימני ושחרר אותו על הפרט המתאים בטור השמאלי. אפשר לנסות שוב בלי לאבד ניקוד.
           </p>
         </div>
       )}
@@ -223,7 +223,7 @@ export default function MatchingGame({ moduleId, userId, backHref, alreadyComple
 
         {/* ── Right column: Concepts (draggable source) ── */}
         <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center mb-3">
+          <p className="text-xs font-bold text-slate-600 text-center mb-3">
             מושגים — גרור ←
           </p>
           <div className="space-y-2 min-h-[40px]">
@@ -241,10 +241,10 @@ export default function MatchingGame({ moduleId, userId, backHref, alreadyComple
                     "rounded-xl border px-3 py-3 text-sm font-semibold select-none",
                     "flex items-center gap-2 transition-all duration-300",
                     hasError
-                      ? "bg-rose-900/50 border-rose-500 text-rose-100 ring-2 ring-rose-500/30 scale-[0.97]"
+                      ? "bg-rose-50 border-rose-500 text-rose-900 ring-2 ring-rose-200 scale-[0.97]"
                       : isDragging
-                        ? "bg-slate-600/40 border-blue-400/50 text-slate-400 opacity-40 scale-95"
-                        : "bg-slate-700 border-slate-600 text-white hover:bg-slate-600 hover:border-blue-400/50 hover:scale-[1.02] cursor-grab active:cursor-grabbing",
+                        ? "bg-brand-50 border-brand-300 text-slate-500 opacity-50 scale-95"
+                        : "bg-white border-slate-300 text-slate-900 shadow-card hover:bg-brand-50 hover:border-brand-400 hover:scale-[1.02] cursor-grab active:cursor-grabbing",
                   ].join(" ")}
                 >
                   <GripVertical className="w-3.5 h-3.5 text-slate-500 shrink-0" />
@@ -255,7 +255,7 @@ export default function MatchingGame({ moduleId, userId, backHref, alreadyComple
 
             {/* Empty state — all dragged away */}
             {unmatchedInOrder.length === 0 && !allDone && (
-              <div className="rounded-xl border border-dashed border-slate-700 py-6 text-center text-slate-600 text-xs">
+              <div className="rounded-xl border border-dashed border-slate-300 py-6 text-center text-slate-600 text-sm">
                 כל המושגים הוזזו
               </div>
             )}
@@ -264,7 +264,7 @@ export default function MatchingGame({ moduleId, userId, backHref, alreadyComple
 
         {/* ── Left column: Details (drop targets) ── */}
         <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center mb-3">
+          <p className="text-xs font-bold text-slate-600 text-center mb-3">
             פרטים מהמקרה
           </p>
           <div className="space-y-2">
@@ -285,36 +285,36 @@ export default function MatchingGame({ moduleId, userId, backHref, alreadyComple
                     "transition-all duration-300",
                     isMatched
                       ? [
-                          "bg-emerald-500/10 border-emerald-500/40 text-emerald-100",
-                          isSuccess ? "scale-[1.03] ring-2 ring-emerald-400/50 shadow-lg shadow-emerald-900/20" : "",
+                          "bg-emerald-50 border-emerald-300 text-emerald-900",
+                          isSuccess ? "scale-[1.03] ring-2 ring-emerald-300 shadow-lift" : "",
                         ].join(" ")
                       : isHovered
-                        ? "bg-blue-500/15 border-blue-400 text-blue-100 ring-1 ring-blue-400/30 scale-[1.02] shadow-lg shadow-blue-900/20"
-                        : "bg-amber-900/40 border-dashed border-amber-700/60 text-amber-100 hover:border-amber-500",
+                        ? "bg-brand-50 border-brand-400 text-brand-900 ring-1 ring-brand-200 scale-[1.02] shadow-lift"
+                        : "bg-amber-50 border-dashed border-amber-400 text-amber-900 hover:border-amber-600",
                   ].join(" ")}
                 >
                   {isMatched ? (
                     /* ── Merged matched unit ── */
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span className="font-bold text-xs text-emerald-200 tracking-wide">
+                        <CheckCircle className="w-4 h-4 text-emerald-700 shrink-0" aria-hidden="true" />
+                        <span className="font-bold text-sm text-emerald-900">
                           {PAIRS[matchedConceptId].concept}
                         </span>
                       </div>
-                      <div className="border-t border-emerald-500/25 pt-1.5">
-                        <span className="text-sm text-emerald-100/90 leading-snug">{PAIRS[id].detail}</span>
+                      <div className="border-t border-emerald-200 pt-1.5">
+                        <span className="text-sm text-emerald-900 leading-snug">{PAIRS[id].detail}</span>
                       </div>
                     </div>
                   ) : (
                     /* ── Unmatched drop zone ── */
                     <div className="flex items-center gap-2">
                       {isHovered && (
-                        <span className="shrink-0 w-4 h-4 rounded-full border-2 border-blue-400 border-dashed animate-spin"
+                        <span className="shrink-0 w-4 h-4 rounded-full border-2 border-brand-500 border-dashed animate-spin"
                           style={{ animationDuration: "1.4s" }}
                         />
                       )}
-                      <span className={isHovered ? "text-blue-200 font-semibold" : ""}>{PAIRS[id].detail}</span>
+                      <span className={isHovered ? "text-brand-900 font-semibold" : ""}>{PAIRS[id].detail}</span>
                     </div>
                   )}
                 </div>
@@ -332,22 +332,22 @@ export default function MatchingGame({ moduleId, userId, backHref, alreadyComple
               key={i}
               className={`rounded-full transition-all duration-300 ${
                 i < matched.size
-                  ? "w-3 h-3 bg-emerald-400 shadow-sm shadow-emerald-400/50"
-                  : "w-2 h-2 bg-slate-700"
+                  ? "w-3 h-3 bg-emerald-600"
+                  : "w-2 h-2 bg-slate-300"
               }`}
             />
           ))}
-          <span className="text-xs text-slate-500 mr-2">{matched.size} / {PAIRS.length} הותאמו</span>
+          <span className="text-sm text-slate-600 me-2">{matched.size} / {PAIRS.length} הותאמו</span>
         </div>
       )}
 
       {/* ── Success banner ── */}
       {allDone && (
-        <div className="bg-emerald-500/10 border border-emerald-400/30 rounded-2xl px-6 py-5 flex items-center gap-4">
-          <Trophy className="w-9 h-9 text-emerald-400 shrink-0" />
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-6 py-5 flex items-center gap-4">
+          <Trophy className="w-9 h-9 text-emerald-700 shrink-0" aria-hidden="true" />
           <div>
-            <p className="font-bold text-emerald-300 text-lg">כל הכבוד! 🎉</p>
-            <p className="text-emerald-400/80 text-sm mt-0.5">
+            <p className="font-bold text-emerald-900 text-lg">כל הכבוד!</p>
+            <p className="text-emerald-800 text-sm mt-0.5">
               זיהית בהצלחה את המרכיבים ההתנהגותיים במקרה של רונן.
             </p>
           </div>
@@ -359,7 +359,7 @@ export default function MatchingGame({ moduleId, userId, backHref, alreadyComple
         {allDone && (
           <Link
             href={backHref}
-            className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-3 px-6 rounded-xl transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 px-6 rounded-xl transition-colors"
           >
             חזור למפגש
             <ChevronRight className="w-4 h-4" />
@@ -367,7 +367,7 @@ export default function MatchingGame({ moduleId, userId, backHref, alreadyComple
         )}
         <button
           onClick={handleReset}
-          className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm px-4 py-3 rounded-xl border border-slate-700 hover:border-slate-500 transition-colors"
+          className="btn-secondary"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           אתחול

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { FileText, Save, CheckCircle } from "lucide-react";
+import { FileText, Save, CheckCircle, AlertCircle, Check } from "lucide-react";
 import type { DynamicFormulation } from "@/types";
 
 const COGNITIVE_DISTORTIONS = [
@@ -23,10 +23,13 @@ export default function FormulationForm({ initialData, userId }: Props) {
   const [data, setData] = useState<FormData>(initialData ?? {});
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   function update(field: keyof FormData, value: unknown) {
     setData((prev) => ({ ...prev, [field]: value }));
     setSaved(false);
+    setDirty(true);
   }
 
   function toggleDistortion(d: string) {
@@ -38,9 +41,15 @@ export default function FormulationForm({ initialData, userId }: Props) {
   async function handleSave() {
     setSaving(true);
     const payload = { ...data, user_id: userId, updated_at: new Date().toISOString() };
-    await supabase.from("dynamic_formulation").upsert(payload, { onConflict: "user_id" });
+    const { error } = await supabase.from("dynamic_formulation").upsert(payload, { onConflict: "user_id" });
     setSaving(false);
+    if (error) {
+      setSaveError("השמירה נכשלה. השינויים עדיין מופיעים כאן — נסה לשמור שוב.");
+      return;
+    }
+    setSaveError("");
     setSaved(true);
+    setDirty(false);
   }
 
   const field = (
@@ -50,8 +59,9 @@ export default function FormulationForm({ initialData, userId }: Props) {
     rows = 3
   ) => (
     <div>
-      <label className="block text-sm font-semibold text-brand-900 mb-1.5">{label}</label>
+      <label className="label-he !text-brand-900" htmlFor={`f-${String(key)}`}>{label}</label>
       <textarea
+        id={`f-${String(key)}`}
         rows={rows}
         value={(data[key] as string) ?? ""}
         onChange={(e) => update(key, e.target.value)}
@@ -64,35 +74,47 @@ export default function FormulationForm({ initialData, userId }: Props) {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-brand-900 flex items-center gap-2">
-            <FileText className="w-6 h-6" />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="page-title flex items-center gap-2">
+            <FileText className="w-6 h-6 text-brand-500 shrink-0" aria-hidden="true" />
             המשגה דינמית — מקרה רץ
           </h1>
-          <p className="text-slate-500 mt-1 text-sm">בנה תמונה קלינית מלאה לאורך הקורס. הנתונים נשמרים אוטומטית.</p>
+          <p className="page-lead">בנה תמונה קלינית מלאה לאורך הקורס. השינויים נשמרים בלחיצה על "שמור".</p>
         </div>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 bg-brand-500 hover:bg-brand-700 text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors disabled:opacity-50 shrink-0"
-        >
-          {saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-          {saving ? "שומר..." : saved ? "נשמר!" : "שמור"}
-        </button>
+        <div className="flex items-center gap-3 shrink-0">
+          <p role="status" aria-live="polite" className="text-sm text-slate-600 flex items-center gap-1.5">
+            {saved && !dirty ? (
+              <><Check className="w-4 h-4 text-emerald-700" aria-hidden="true" />נשמר</>
+            ) : dirty ? (
+              "יש שינויים שלא נשמרו"
+            ) : null}
+          </p>
+          <button onClick={handleSave} disabled={saving} className="btn-primary">
+            {saved && !dirty ? <CheckCircle className="w-4 h-4" aria-hidden="true" /> : <Save className="w-4 h-4" aria-hidden="true" />}
+            {saving ? "שומר..." : "שמור"}
+          </button>
+        </div>
       </div>
 
+      {saveError && (
+        <p role="alert" className="flex items-center gap-2 rounded-lg bg-red-50 ring-1 ring-inset ring-red-200 px-4 py-3 text-sm text-red-800">
+          <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
+          {saveError}
+        </p>
+      )}
+
       {/* Section: Presenting Problem */}
-      <section className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-        <h2 className="text-base font-bold text-brand-900 border-b border-slate-100 pb-3">🎯 בעיה מוצגת ומטרות</h2>
+      <section className="bg-white rounded-2xl border border-slate-200 shadow-card p-5 sm:p-7 space-y-5">
+        <h2 className="section-title border-b border-slate-100 pb-3">בעיה מוצגת ומטרות</h2>
         {field("בעיה מוצגת", "presenting_problem", "תאר את הבעיה העיקרית שהמטופל מביא לטיפול...")}
         {field("מטרות טיפוליות", "therapy_goals", "מה המטופל רוצה להשיג בטיפול?")}
         {field("היסטוריה התפתחותית", "developmental_history", "רקע משפחתי, חוויות ילדות רלוונטיות...", 4)}
       </section>
 
       {/* Section: ABC Model */}
-      <section className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-        <h2 className="text-base font-bold text-brand-900 border-b border-slate-100 pb-3">🔄 מודל ABC — מצב → מחשבה → תגובה</h2>
+      <section className="bg-white rounded-2xl border border-slate-200 shadow-card p-5 sm:p-7 space-y-5">
+        <h2 className="section-title border-b border-slate-100 pb-3">מודל ABC — מצב → מחשבה → תגובה</h2>
         <div className="grid md:grid-cols-2 gap-4">
           {field("מצב מעורר (A)", "triggering_situation", "מה קרה? מתי? עם מי?")}
           {field("מחשבות אוטומטיות (B)", "automatic_thoughts", "מה עבר לו בראש? מחשבה חמה?")}
@@ -103,8 +125,8 @@ export default function FormulationForm({ initialData, userId }: Props) {
       </section>
 
       {/* Section: Core Beliefs */}
-      <section className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-        <h2 className="text-base font-bold text-brand-900 border-b border-slate-100 pb-3">🧠 אמונות יסוד (סכמות)</h2>
+      <section className="bg-white rounded-2xl border border-slate-200 shadow-card p-5 sm:p-7 space-y-5">
+        <h2 className="section-title border-b border-slate-100 pb-3">אמונות יסוד (סכמות)</h2>
         <div className="grid md:grid-cols-3 gap-4">
           {field("אמונות יסוד על עצמי", "core_beliefs_self", "אני..., אני לא ראוי..., אני חלש...")}
           {field("אמונות יסוד על אחרים", "core_beliefs_others", "אנשים..., אחרים..., העולם...")}
@@ -115,8 +137,8 @@ export default function FormulationForm({ initialData, userId }: Props) {
       </section>
 
       {/* Section: Behavioral Patterns */}
-      <section className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-        <h2 className="text-base font-bold text-brand-900 border-b border-slate-100 pb-3">🛡 דפוסי ביטחון והימנעות</h2>
+      <section className="bg-white rounded-2xl border border-slate-200 shadow-card p-5 sm:p-7 space-y-5">
+        <h2 className="section-title border-b border-slate-100 pb-3">דפוסי ביטחון והימנעות</h2>
         <div className="grid md:grid-cols-2 gap-4">
           {field("התנהגויות ביטחון", "safety_behaviors", "מה הוא עושה כדי לשרוד מצבים מאיימים?")}
           {field("דפוסי הימנעות", "avoidance_patterns", "ממה הוא נמנע? אילו מצבים מעורר?")}
@@ -124,8 +146,8 @@ export default function FormulationForm({ initialData, userId }: Props) {
       </section>
 
       {/* Section: Cognitive Distortions */}
-      <section className="bg-white rounded-2xl border border-slate-200 p-6">
-        <h2 className="text-base font-bold text-brand-900 border-b border-slate-100 pb-3 mb-4">💡 עיוותי חשיבה עיקריים</h2>
+      <section className="bg-white rounded-2xl border border-slate-200 shadow-card p-5 sm:p-7">
+        <h2 className="section-title border-b border-slate-100 pb-3 mb-4">עיוותי חשיבה עיקריים</h2>
         <div className="flex flex-wrap gap-2">
           {COGNITIVE_DISTORTIONS.map((d) => {
             const active = (data.cognitive_distortions ?? []).includes(d);
@@ -134,13 +156,14 @@ export default function FormulationForm({ initialData, userId }: Props) {
                 key={d}
                 type="button"
                 onClick={() => toggleDistortion(d)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                aria-pressed={active}
+                className={`px-3.5 min-h-[40px] rounded-full text-sm font-medium border transition-colors ${
                   active
                     ? "bg-brand-500 text-white border-brand-500"
                     : "bg-white text-slate-600 border-slate-300 hover:border-brand-400"
                 }`}
               >
-                {active ? "✓ " : ""}{d}
+                {active && <Check className="w-3.5 h-3.5 inline-block me-1.5 -mt-0.5" aria-hidden="true" />}{d}
               </button>
             );
           })}
@@ -149,13 +172,9 @@ export default function FormulationForm({ initialData, userId }: Props) {
 
       {/* Save button (bottom) */}
       <div className="flex justify-end">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 bg-brand-500 hover:bg-brand-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors disabled:opacity-50"
-        >
-          {saved ? <CheckCircle className="w-5 h-5" /> : <Save className="w-5 h-5" />}
-          {saving ? "שומר..." : saved ? "נשמר בהצלחה!" : "שמור המשגה"}
+        <button onClick={handleSave} disabled={saving} className="btn-primary px-6 py-3">
+          {saved && !dirty ? <CheckCircle className="w-5 h-5" aria-hidden="true" /> : <Save className="w-5 h-5" aria-hidden="true" />}
+          {saving ? "שומר..." : saved && !dirty ? "נשמר בהצלחה" : "שמור המשגה"}
         </button>
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { HelpCircle, X, Send, ChevronRight, MessageSquare, Clock, CheckCircle } from "lucide-react";
+import { HelpCircle, X, Send, ChevronRight, MessageSquare, Clock, CheckCircle, Brain, Wrench, Lock, Users } from "lucide-react";
 import type { Question, QuestionType } from "@/types";
 
 interface Props {
@@ -143,10 +143,10 @@ export default function AskLecturerButton({ userId, groupId }: Props) {
       {/* Floating button */}
       <button
         onClick={() => openModal(unseenCount > 0 ? "my-questions" : "ask")}
-        className="fixed bottom-6 left-6 z-50 flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white rounded-full shadow-lg px-4 py-3 text-sm font-semibold transition-all hover:shadow-xl"
+        className="fixed bottom-[4.75rem] md:bottom-6 left-4 md:left-6 z-40 flex items-center gap-2 min-h-[48px] bg-brand-600 hover:bg-brand-700 text-white rounded-full shadow-lift px-5 py-3 text-sm font-semibold transition-colors"
         title="שאל את המרצה"
       >
-        <HelpCircle className="w-5 h-5" />
+        <HelpCircle className="w-5 h-5" aria-hidden="true" />
         <span>שאל את המרצה</span>
         {unseenCount > 0 && (
           <span className="bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center -mr-1">
@@ -161,12 +161,12 @@ export default function AskLecturerButton({ userId, groupId }: Props) {
           className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
           onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
         >
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+          <div role="dialog" aria-modal="true" aria-labelledby="ask-lecturer-title" className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             {/* Header */}
-            <div className="bg-brand-900 text-white px-5 py-4 flex items-center justify-between">
-              <h2 className="font-bold text-base">שאל את המרצה</h2>
-              <button onClick={closeModal} className="text-white/70 hover:text-white transition-colors">
-                <X className="w-5 h-5" />
+            <div className="bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between">
+              <h2 id="ask-lecturer-title" className="font-bold text-lg text-brand-900">שאל את המרצה</h2>
+              <button onClick={closeModal} aria-label="סגור" className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors w-10 h-10 flex items-center justify-center rounded-lg">
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
@@ -177,7 +177,7 @@ export default function AskLecturerButton({ userId, groupId }: Props) {
                 className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-colors ${
                   activeTab === "ask"
                     ? "border-b-2 border-brand-500 text-brand-700 bg-white"
-                    : "text-slate-500 hover:text-slate-700"
+                    : "text-slate-600 hover:text-slate-800"
                 }`}
               >
                 <Send className="w-4 h-4" />
@@ -188,7 +188,7 @@ export default function AskLecturerButton({ userId, groupId }: Props) {
                 className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-colors ${
                   activeTab === "my-questions"
                     ? "border-b-2 border-brand-500 text-brand-700 bg-white"
-                    : "text-slate-500 hover:text-slate-700"
+                    : "text-slate-600 hover:text-slate-800"
                 }`}
               >
                 <MessageSquare className="w-4 h-4" />
@@ -207,7 +207,7 @@ export default function AskLecturerButton({ userId, groupId }: Props) {
               {activeTab === "ask" && (
                 done ? (
                   <div className="text-center py-6">
-                    <div className="text-5xl mb-4">✅</div>
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50"><CheckCircle className="w-7 h-7 text-emerald-700" aria-hidden="true" /></div>
                     <p className="font-bold text-slate-800 text-lg mb-1">השאלה נשלחה!</p>
                     <p className="text-slate-500 text-sm mb-5">
                       {visibility === "private"
@@ -237,7 +237,7 @@ export default function AskLecturerButton({ userId, groupId }: Props) {
                         onClick={() => selectType("professional")}
                         className="flex flex-col items-center gap-3 border-2 border-slate-200 hover:border-brand-400 hover:bg-brand-50 rounded-xl p-5 transition-all"
                       >
-                        <span className="text-3xl">🧠</span>
+                        <Brain className="w-8 h-8 text-brand-500" aria-hidden="true" />
                         <div className="text-center">
                           <p className="font-semibold text-slate-800">מקצועית</p>
                           <p className="text-xs text-slate-500 mt-0.5">תוכן הקורס, CBT, קלינית</p>
@@ -247,7 +247,7 @@ export default function AskLecturerButton({ userId, groupId }: Props) {
                         onClick={() => selectType("technical")}
                         className="flex flex-col items-center gap-3 border-2 border-slate-200 hover:border-brand-400 hover:bg-brand-50 rounded-xl p-5 transition-all"
                       >
-                        <span className="text-3xl">⚙️</span>
+                        <Wrench className="w-8 h-8 text-brand-500" aria-hidden="true" />
                         <div className="text-center">
                           <p className="font-semibold text-slate-800">טכנית</p>
                           <p className="text-xs text-slate-500 mt-0.5">בעיה בגישה, וידאו, אתר</p>
@@ -264,7 +264,7 @@ export default function AskLecturerButton({ userId, groupId }: Props) {
                       <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
                         questionType === "professional" ? "bg-brand-100 text-brand-700" : "bg-amber-100 text-amber-700"
                       }`}>
-                        {questionType === "professional" ? "🧠 מקצועית" : "⚙️ טכנית"}
+                        {questionType === "professional" ? "מקצועית" : "טכנית"}
                       </span>
                     </div>
 
@@ -290,7 +290,7 @@ export default function AskLecturerButton({ userId, groupId }: Props) {
                               : "border-slate-200 text-slate-600 hover:border-slate-300"
                           }`}
                         >
-                          <span className="text-xl">🔒</span>
+                          <Lock className="w-5 h-5" aria-hidden="true" />
                           <span className="font-semibold text-xs">פרטי למרצה</span>
                         </button>
                         <button
@@ -302,7 +302,7 @@ export default function AskLecturerButton({ userId, groupId }: Props) {
                               : "border-slate-200 text-slate-600 hover:border-slate-300"
                           }`}
                         >
-                          <span className="text-xl">👥</span>
+                          <Users className="w-5 h-5" aria-hidden="true" />
                           <span className="font-semibold text-xs">כל הקבוצה</span>
                         </button>
                       </div>
@@ -334,7 +334,7 @@ export default function AskLecturerButton({ userId, groupId }: Props) {
                     <div className="text-center py-8 text-slate-400 text-sm">טוען...</div>
                   ) : myQuestions.length === 0 ? (
                     <div className="text-center py-8">
-                      <span className="text-4xl block mb-3">💬</span>
+                      <MessageSquare className="w-10 h-10 mx-auto mb-3 text-slate-400" aria-hidden="true" />
                       <p className="text-slate-500 text-sm">עוד לא שלחת שאלות</p>
                     </div>
                   ) : (
@@ -350,7 +350,7 @@ export default function AskLecturerButton({ userId, groupId }: Props) {
                               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                                 q.type === "professional" ? "bg-brand-100 text-brand-700" : "bg-amber-100 text-amber-700"
                               }`}>
-                                {q.type === "professional" ? "🧠 מקצועית" : "⚙️ טכנית"}
+                                {q.type === "professional" ? "מקצועית" : "טכנית"}
                               </span>
                               <span className="text-xs text-slate-400">{formatTime(q.created_at)}</span>
                               <div className="mr-auto flex items-center gap-1">

@@ -2,10 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { Check, ChevronRight, ChevronLeft } from "lucide-react";
 import MarkWatchedButton from "@/components/modules/MarkWatchedButton";
 import LessonActivityBar from "@/components/modules/LessonActivityBar";
 import PageVisitTracker from "@/components/tracking/PageVisitTracker";
+import { ProgressBar } from "@/components/ui/ProgressBar";
 import { moduleCompletion, isModuleAccessible, getModuleUnlockStatus } from "@/lib/utils";
 import type { Module, Progress, Resource, GroupModuleDate } from "@/types";
 
@@ -94,41 +95,31 @@ export default async function ModulePage({ params }: { params: { id: string } })
       <PageVisitTracker moduleId={currentMod.id} />
 
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-slate-400">
-        <Link href="/modules" className="hover:text-brand-500 transition-colors">מפגשים</Link>
-        <ChevronLeft className="w-3.5 h-3.5" />
-        <span className="text-slate-600">מפגש {currentMod.order_number}</span>
-      </div>
+      <nav aria-label="פירורי לחם" className="flex items-center gap-2 text-sm text-slate-600">
+        <Link href="/modules" className="hover:text-brand-700 underline-offset-4 hover:underline transition-colors">מפגשים</Link>
+        <ChevronLeft className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
+        <span aria-current="page" className="text-slate-800 font-medium">מפגש {currentMod.order_number}</span>
+      </nav>
 
       {/* Header: number + title + progress bar */}
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs font-semibold text-brand-500 bg-brand-50 px-3 py-1 rounded-full">
-            מפגש {currentMod.order_number} מתוך 12
-          </span>
-        </div>
-        <h1 className="text-2xl font-bold text-brand-900 leading-snug">{currentMod.title_he}</h1>
+      <header>
+        <p className="eyebrow mb-1.5">
+          מפגש {currentMod.order_number} מתוך {sorted.length}
+          {currentMod.is_async && " · הקלטה"}
+        </p>
+        <h1 className="page-title text-balance">{currentMod.title_he}</h1>
         {currentMod.description_he && (
-          <p className="text-slate-500 mt-1.5 text-sm leading-relaxed">{currentMod.description_he}</p>
+          <p className="page-lead max-w-[68ch] leading-relaxed">{currentMod.description_he}</p>
         )}
 
-        {/* Linear progress bar */}
-        <div className="mt-4">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs text-slate-400">התקדמות במפגש</span>
-            <span className="text-xs font-semibold text-brand-600">{pct}%</span>
-          </div>
-          <div className="bg-slate-100 rounded-full h-1.5 overflow-hidden">
-            <div
-              className="bg-brand-500 h-1.5 rounded-full transition-all duration-700"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
+        <div className="mt-5 flex items-center gap-3 max-w-md">
+          <ProgressBar value={pct} label="התקדמות במפגש" className="flex-1" />
+          <span className="text-sm font-semibold text-slate-700 whitespace-nowrap">{pct}% הושלם</span>
         </div>
-      </div>
+      </header>
 
       {/* Video Hero */}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <section aria-label="סרטון המפגש" className="bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
         {currentMod.video_url ? (
           <>
             <div className="bg-slate-900">
@@ -150,14 +141,14 @@ export default async function ModulePage({ params }: { params: { id: string } })
                 </div>
               )}
             </div>
-            <div className="px-5 py-4 flex items-center justify-between border-t border-slate-100">
+            <div className="px-5 py-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100">
               <div>
-                <p className="text-sm font-semibold text-brand-900">סרטון הרצאה</p>
-                <p className="text-xs text-slate-400 mt-0.5">צפה וסמן כנצפה לקבלת נקודות</p>
+                <p className="font-semibold text-brand-900">סרטון הרצאה</p>
+                <p className="text-sm text-slate-600 mt-0.5">צפה וסמן כנצפה לקבלת נקודות</p>
               </div>
               {prog?.video_watched ? (
-                <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
-                  <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">✓</span>
+                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-800 bg-emerald-50 ring-1 ring-inset ring-emerald-200 px-3 py-1.5 rounded-lg">
+                  <Check className="w-4 h-4" aria-hidden="true" />
                   נצפה
                 </span>
               ) : (
@@ -166,11 +157,11 @@ export default async function ModulePage({ params }: { params: { id: string } })
             </div>
           </>
         ) : (
-          <div className="aspect-video bg-slate-50 flex items-center justify-center">
-            <p className="text-slate-400 text-sm">סרטון יתווסף בקרוב</p>
+          <div className="aspect-video bg-slate-100 flex items-center justify-center">
+            <p className="text-slate-600 text-sm">סרטון יתווסף בקרוב</p>
           </div>
         )}
-      </div>
+      </section>
 
       {/* Activity Bar */}
       <LessonActivityBar
@@ -185,26 +176,32 @@ export default async function ModulePage({ params }: { params: { id: string } })
       />
 
       {/* Navigation */}
-      <div className="flex justify-between pt-2 border-t border-slate-100">
+      <nav aria-label="מעבר בין מפגשים" className="grid gap-3 sm:grid-cols-2 pt-2">
         {prevModule ? (
           <Link
             href={`/modules/${prevModule.id}`}
-            className="flex items-center gap-2 text-sm text-brand-500 hover:text-brand-700 font-medium transition-colors"
+            className="flex items-center gap-3 bg-white rounded-xl border border-slate-200 px-4 py-3 hover:border-brand-300 hover:shadow-card transition-all"
           >
-            <ChevronRight className="w-4 h-4" />
-            מפגש קודם
+            <ChevronRight className="w-5 h-5 text-brand-500 shrink-0" aria-hidden="true" />
+            <span>
+              <span className="block text-xs text-slate-600">מפגש קודם</span>
+              <span className="block font-semibold text-slate-900">מפגש {sorted[modIndex - 1].order_number}</span>
+            </span>
           </Link>
         ) : <div />}
         {nextModule && (
           <Link
             href={`/modules/${nextModule.id}`}
-            className="flex items-center gap-2 text-sm text-brand-500 hover:text-brand-700 font-medium transition-colors"
+            className="flex items-center justify-between gap-3 bg-white rounded-xl border border-slate-200 px-4 py-3 hover:border-brand-300 hover:shadow-card transition-all"
           >
-            מפגש הבא
-            <ChevronLeft className="w-4 h-4" />
+            <span>
+              <span className="block text-xs text-slate-600">מפגש הבא</span>
+              <span className="block font-semibold text-slate-900">מפגש {sorted[modIndex + 1].order_number}</span>
+            </span>
+            <ChevronLeft className="w-5 h-5 text-brand-500 shrink-0" aria-hidden="true" />
           </Link>
         )}
-      </div>
+      </nav>
     </div>
   );
 }

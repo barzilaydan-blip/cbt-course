@@ -207,7 +207,7 @@ export default function ClinicalExercise({ moduleId, existingSubmission, backHre
           onClick={() => setCaseOpen(o => !o)}
           className="w-full flex items-center justify-between px-5 py-4 text-right hover:bg-slate-50 transition-colors"
         >
-          <span className="font-bold text-brand-900">📋 תיאור המקרה — רון (אקרופוביה)</span>
+          <span className="font-bold text-brand-900">תיאור המקרה — רון (אקרופוביה)</span>
           {caseOpen ? <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />}
         </button>
         {caseOpen && (

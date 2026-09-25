@@ -74,7 +74,7 @@ export default function AdminQuestions({ initialQuestions }: Props) {
             onClick={() => setFilter(f)}
             className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
               filter === f
-                ? "bg-brand-900 text-white"
+                ? "bg-brand-500 text-white"
                 : "bg-white border border-slate-200 text-slate-600 hover:border-brand-300"
             }`}
           >
@@ -86,7 +86,7 @@ export default function AdminQuestions({ initialQuestions }: Props) {
 
       {filtered.length === 0 && (
         <div className="bg-white rounded-xl border border-slate-200 p-10 text-center text-slate-400 text-sm">
-          {filter === "pending" ? "אין שאלות ממתינות 🎉" : "אין שאלות"}
+          {filter === "pending" ? "אין שאלות ממתינות" : "אין שאלות"}
         </div>
       )}
 
@@ -119,7 +119,7 @@ export default function AdminQuestions({ initialQuestions }: Props) {
                       ? "bg-brand-100 text-brand-700"
                       : "bg-amber-100 text-amber-700"
                   }`}>
-                    {q.type === "professional" ? "🧠 מקצועית" : "⚙️ טכנית"}
+                    {q.type === "professional" ? "מקצועית" : "טכנית"}
                   </span>
                   <span className="text-xs text-slate-400">{formatTime(q.created_at)}</span>
                 </div>

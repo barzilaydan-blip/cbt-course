@@ -23,7 +23,7 @@ export default async function ProtectedLayout({
     .single();
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-slate-50">
       <Navbar profile={profile as Profile | null} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-8">
         {children}

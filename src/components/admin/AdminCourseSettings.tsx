@@ -33,7 +33,7 @@ export default function AdminCourseSettings({ settings }: { settings: CourseSett
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-5">
       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h2 className="font-bold text-brand-900">⚙️ הגדרות קורס כלליות</h2>
+        <h2 className="font-bold text-brand-900">הגדרות קורס כלליות</h2>
         <button
           onClick={handleSave}
           disabled={saving}
@@ -46,7 +46,7 @@ export default function AdminCourseSettings({ settings }: { settings: CourseSett
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1.5">📅 יום קבוע של המפגשים</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">יום קבוע של המפגשים</label>
           <select
             value={meetingDayHe}
             onChange={(e) => { setMeetingDayHe(e.target.value); setSaved(false); }}
@@ -56,7 +56,7 @@ export default function AdminCourseSettings({ settings }: { settings: CourseSett
           </select>
         </div>
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1.5">🕕 שעה קבועה</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">שעה קבועה</label>
           <input
             type="time"
             value={meetingTime}
@@ -69,7 +69,7 @@ export default function AdminCourseSettings({ settings }: { settings: CourseSett
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1.5">🎥 קישור Zoom קבוע לקורס</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">קישור Zoom קבוע לקורס</label>
           <input
             type="url"
             value={zoomUrl}
@@ -80,7 +80,7 @@ export default function AdminCourseSettings({ settings }: { settings: CourseSett
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1.5">🔑 סיסמת Zoom</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">סיסמת Zoom</label>
           <input
             type="text"
             value={zoomPassword}
@@ -93,7 +93,7 @@ export default function AdminCourseSettings({ settings }: { settings: CourseSett
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-1.5">📄 קישור לסילבוס</label>
+        <label className="block text-sm font-semibold text-slate-700 mb-1.5">קישור לסילבוס</label>
         <input
           type="url"
           value={syllabusUrl}

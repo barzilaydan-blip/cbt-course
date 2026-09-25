@@ -171,7 +171,7 @@ export default function AdminApprovedEmails({ initialEmails }: Props) {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-brand-900 text-white">
+            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
               <tr>
                 <th className="px-4 py-3 text-right font-semibold">אימייל</th>
                 <th className="px-4 py-3 text-right font-semibold">סטטוס</th>

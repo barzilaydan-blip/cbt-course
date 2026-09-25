@@ -117,10 +117,10 @@ export default function AdminModuleEditor({ mod, initialQuiz }: Props) {
 
       {/* Content URLs */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-        <h2 className="font-bold text-brand-900 border-b border-slate-100 pb-3">🔗 קישורי תוכן</h2>
+        <h2 className="font-bold text-brand-900 border-b border-slate-100 pb-3">קישורי תוכן</h2>
 
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1.5">📹 קישור סרטון (YouTube embed URL)</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">קישור סרטון (YouTube embed URL)</label>
           <input
             type="url"
             value={videoUrl}
@@ -132,7 +132,7 @@ export default function AdminModuleEditor({ mod, initialQuiz }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1.5">📄 קישור מאמר</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">קישור מאמר</label>
           <input
             type="url"
             value={articleUrl}
@@ -144,7 +144,7 @@ export default function AdminModuleEditor({ mod, initialQuiz }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1.5">🎙 קישור פודקאסט</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">קישור פודקאסט</label>
           <input
             type="url"
             value={podcastUrl}
@@ -156,7 +156,7 @@ export default function AdminModuleEditor({ mod, initialQuiz }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1.5">📅 תאריך מפגש</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">תאריך מפגש</label>
           <input
             type="date"
             value={meetingDate}
@@ -168,13 +168,13 @@ export default function AdminModuleEditor({ mod, initialQuiz }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">🔐 גישת סטודנטים</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">גישת סטודנטים</label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {([
-              { value: "auto",   icon: "⚡", title: "אוטומטי", desc: "נפתח שבוע לפני המועד או כשהשיעור הקודם הושלם" },
-              { value: "open",   icon: "🔓", title: "פתוח",    desc: "פתוח תמיד לכל הסטודנטים" },
-              { value: "locked", icon: "🔒", title: "נעול",    desc: "חסום לסטודנטים (רק מנהל יכול לצפות)" },
-            ] as const).map(({ value, icon, title, desc }) => (
+              { value: "auto",   title: "אוטומטי", desc: "נפתח שבוע לפני המועד או כשהשיעור הקודם הושלם" },
+              { value: "open",   title: "פתוח",    desc: "פתוח תמיד לכל הסטודנטים" },
+              { value: "locked", title: "נעול",    desc: "חסום לסטודנטים (רק מנהל יכול לצפות)" },
+            ] as const).map(({ value, title, desc }) => (
               <button
                 key={value}
                 type="button"
@@ -189,7 +189,7 @@ export default function AdminModuleEditor({ mod, initialQuiz }: Props) {
                     : "border-slate-200 bg-white hover:border-slate-300"
                 }`}
               >
-                <p className="font-semibold text-slate-800 text-sm">{icon} {title}</p>
+                <p className="font-semibold text-slate-800 text-sm">{title}</p>
                 <p className="text-xs text-slate-500 mt-0.5 leading-snug">{desc}</p>
               </button>
             ))}
@@ -199,7 +199,7 @@ export default function AdminModuleEditor({ mod, initialQuiz }: Props) {
 
       {/* Weekly challenge */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-        <h2 className="font-bold text-brand-900 border-b border-slate-100 pb-3">🎯 אתגר אישי שבועי</h2>
+        <h2 className="font-bold text-brand-900 border-b border-slate-100 pb-3">אתגר אישי שבועי</h2>
         <p className="text-sm text-slate-500">
           תיאור חוויתי לתרגול עצמאי במהלך השבוע. יופיע בטאב ייעודי בדף המפגש.
         </p>
@@ -211,7 +211,7 @@ export default function AdminModuleEditor({ mod, initialQuiz }: Props) {
           className="input-he resize-none leading-relaxed"
         />
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1.5">🔗 קישור לטופס / סרטון (אופציונלי)</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">קישור לטופס / סרטון (אופציונלי)</label>
           <input
             type="url"
             value={weeklyChallengeUrl}
@@ -226,7 +226,7 @@ export default function AdminModuleEditor({ mod, initialQuiz }: Props) {
       {/* Quiz editor */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h2 className="font-bold text-brand-900">✍️ שאלות חידון</h2>
+          <h2 className="font-bold text-brand-900">שאלות חידון</h2>
           <button onClick={addQuestion} className="flex items-center gap-1.5 text-sm text-brand-500 hover:text-brand-700 font-semibold">
             <Plus className="w-4 h-4" />
             הוסף שאלה

@@ -1,4 +1,5 @@
 "use client";
+import { Brain, Heart, Activity, Zap, Trophy, CheckCircle, type LucideIcon } from "lucide-react";
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -25,11 +26,11 @@ interface Item {
   correct: Category;
 }
 
-const CATEGORIES: { id: Category; label: string; emoji: string; color: string; bg: string; border: string }[] = [
-  { id: "thought",   label: "מחשבה",         emoji: "🧠", color: "text-brand-700",  bg: "bg-brand-50",  border: "border-brand-300" },
-  { id: "emotion",   label: "רגש",            emoji: "💛", color: "text-amber-700",  bg: "bg-amber-50",  border: "border-amber-300" },
-  { id: "sensation", label: "תחושה גופנית",   emoji: "🫀", color: "text-rose-700",   bg: "bg-rose-50",   border: "border-rose-300"  },
-  { id: "impulse",   label: "דחף",            emoji: "⚡", color: "text-purple-700", bg: "bg-purple-50", border: "border-purple-300" },
+const CATEGORIES: { id: Category; label: string; Icon: LucideIcon; color: string; bg: string; border: string }[] = [
+  { id: "thought",   label: "מחשבה",         Icon: Brain, color: "text-brand-700",  bg: "bg-brand-50",  border: "border-brand-300" },
+  { id: "emotion",   label: "רגש",            Icon: Heart, color: "text-amber-700",  bg: "bg-amber-50",  border: "border-amber-300" },
+  { id: "sensation", label: "תחושה גופנית",   Icon: Activity, color: "text-rose-700",   bg: "bg-rose-50",   border: "border-rose-300"  },
+  { id: "impulse",   label: "דחף",            Icon: Zap, color: "text-purple-700", bg: "bg-purple-50", border: "border-purple-300" },
 ];
 
 const ITEMS: Item[] = [
@@ -100,9 +101,9 @@ function DropZone({
     >
       {/* Header */}
       <div className={`flex items-center gap-2 px-4 py-3 rounded-t-xl ${cat.bg} border-b border-slate-100`}>
-        <span className="text-xl">{cat.emoji}</span>
+        <cat.Icon className={`w-5 h-5 ${cat.color}`} aria-hidden="true" />
         <span className={`font-bold text-sm ${cat.color}`}>{cat.label}</span>
-        <span className="mr-auto text-xs text-slate-400">{placed.length}</span>
+        <span className="me-auto text-xs text-slate-600">{placed.length}</span>
       </div>
       {/* Placed items */}
       <div className="flex flex-wrap gap-2 p-3 flex-1">
@@ -157,11 +158,11 @@ function Results({
     <div className="flex flex-col items-center text-center py-10 gap-4">
       {isChampion ? (
         <>
-          <div className="text-6xl">🏆</div>
+          <Trophy className="w-14 h-14 text-emerald-700 mx-auto" aria-hidden="true" />
           <h2 className="text-3xl font-extrabold text-brand-900">אלופ/ה!</h2>
         </>
       ) : (
-        <div className="text-5xl">✅</div>
+        <CheckCircle className="w-12 h-12 text-emerald-700 mx-auto" aria-hidden="true" />
       )}
       <p className="text-slate-600 text-lg">
         ענית נכון על <span className="font-bold text-brand-700">{correct}</span> מתוך{" "}
@@ -197,7 +198,7 @@ function Results({
             {saving ? "שומר..." : "שמור ניקוד"}
           </button>
         ) : (
-          <p className="text-green-600 font-semibold text-sm self-center">✓ הניקוד נשמר!</p>
+          <p className="text-green-600 font-semibold text-sm self-center">הניקוד נשמר</p>
         )}
         <a
           href={backHref}

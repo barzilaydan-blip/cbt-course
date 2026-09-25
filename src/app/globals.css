@@ -2,12 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Design tokens — "clinic of learning": calm, warm, precise.
+ * Colours are space-separated RGB channels so Tailwind opacity utilities work.
+ * See docs/design-system.md for usage rules.
+ */
 :root {
-  --brand-50: #e8f4fd;
-  --brand-100: #d0e8fb;
-  --brand-500: #2c6e9e;
-  --brand-700: #1a4f75;
-  --brand-900: #1a3a5c;
+  /* Warm neutrals (canvas → borders) into cool ink (text) */
+  --slate-50: 247 245 240;   /* page canvas */
+  --slate-100: 239 236 229;  /* subtle fills, dividers */
+  --slate-200: 226 222 213;  /* card borders */
+  --slate-300: 169 176 183;  /* input borders */
+  --slate-400: 98 109 121;   /* placeholders, icons (5.2:1 on white) */
+  --slate-500: 82 93 105;    /* secondary text (6.7:1) */
+  --slate-600: 65 76 88;
+  --slate-700: 47 58 69;
+  --slate-800: 33 43 53;
+  --slate-900: 21 29 38;     /* body text */
+
+  /* Primary — petrol blue */
+  --brand-50: 238 245 251;
+  --brand-100: 217 232 245;
+  --brand-200: 179 209 234;
+  --brand-300: 130 178 217;
+  --brand-400: 79 143 196;
+  --brand-500: 44 110 158;
+  --brand-600: 36 92 135;
+  --brand-700: 27 74 112;
+  --brand-800: 21 57 90;
+  --brand-900: 20 47 76;     /* headings */
+
+  /* Secondary — blue-green */
+  --teal-50: 234 246 245;
+  --teal-100: 207 233 230;
+  --teal-200: 163 211 206;
+  --teal-300: 111 185 178;
+  --teal-400: 63 157 150;
+  --teal-500: 36 130 124;
+  --teal-600: 28 108 103;
+  --teal-700: 23 87 82;
+  --teal-800: 18 69 66;
+  --teal-900: 14 53 51;
+
+  /* Semantic roles (use these names in new code) */
+  --color-complete: 5 150 105;     /* emerald-600: completion only */
+  --color-attention: 180 83 9;     /* amber-700: needs action only */
 }
 
 @layer base {
@@ -15,45 +54,103 @@
     box-sizing: border-box;
   }
 
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     font-family: var(--font-heebo), "Segoe UI", Arial, sans-serif;
     direction: rtl;
     text-align: right;
+    line-height: 1.65;
+    color: rgb(var(--slate-900));
+    background: rgb(var(--slate-50));
   }
 
-  /* Smooth scrolling */
-  html {
-    scroll-behavior: smooth;
+  /* Visible keyboard focus everywhere; inputs add their own ring below */
+  :focus-visible {
+    outline: 2px solid rgb(var(--brand-500));
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Numbers, emails and Latin abbreviations stay readable inside Hebrew text */
+  bdi,
+  .bidi-isolate {
+    unicode-bidi: isolate;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
 @layer components {
-  /* RTL-aware card with right border accent */
+  /* Surfaces */
+  .surface {
+    @apply bg-white rounded-xl border border-slate-200 shadow-card;
+  }
   .card-accent {
-    @apply bg-white rounded-xl shadow-sm border border-slate-200 border-r-4 border-r-brand-500;
+    @apply bg-white rounded-xl shadow-card border border-slate-200 border-r-4 border-r-brand-500;
   }
 
-  /* Hebrew-optimized input */
+  /* Page headings */
+  .page-title {
+    @apply text-2xl sm:text-[1.75rem] font-bold text-brand-900 leading-snug tracking-tight;
+  }
+  .page-lead {
+    @apply text-base text-slate-600 mt-1;
+  }
+  .section-title {
+    @apply text-lg font-bold text-brand-900;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold text-slate-500 tracking-wide;
+  }
+
+  /* Long-form reading: comfortable measure and leading for Hebrew */
+  .prose-he {
+    @apply max-w-[68ch] text-base leading-8 text-slate-800;
+  }
+
+  /* Forms */
+  .label-he {
+    @apply block text-sm font-semibold text-slate-800 mb-1.5;
+  }
   .input-he {
-    @apply w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white
-           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent
-           placeholder:text-slate-400 text-right;
+    @apply w-full min-h-[44px] border border-slate-300 rounded-lg px-3.5 py-2.5 text-base bg-white
+           text-slate-900 text-right transition-shadow
+           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500
+           placeholder:text-slate-400 disabled:bg-slate-100 disabled:text-slate-500;
   }
 
-  /* Primary button */
+  /* Buttons */
   .btn-primary {
-    @apply bg-brand-500 hover:bg-brand-700 text-white font-semibold px-5 py-2.5
-           rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 min-h-[44px] bg-brand-500 hover:bg-brand-700 text-white
+           font-semibold px-5 py-2.5 rounded-lg transition-colors duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
-
-  /* Secondary button */
   .btn-secondary {
-    @apply bg-white hover:bg-slate-50 text-brand-500 font-semibold px-5 py-2.5
-           rounded-lg border-2 border-brand-500 transition-colors duration-150;
+    @apply inline-flex items-center justify-center gap-2 min-h-[44px] bg-white hover:bg-brand-50 text-brand-600
+           font-semibold px-5 py-2.5 rounded-lg border border-brand-300 hover:border-brand-500
+           transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 }
 
 @layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
   .text-balance {
     text-wrap: balance;
   }

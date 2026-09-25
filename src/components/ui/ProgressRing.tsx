@@ -10,7 +10,7 @@ export function ProgressRing({
   percent,
   size = 56,
   strokeWidth = 5,
-  color = "#2c6e9e",
+  color = "rgb(var(--brand-500))",
   label,
 }: ProgressRingProps) {
   const r = (size - strokeWidth) / 2;
@@ -25,7 +25,7 @@ export function ProgressRing({
           cy={size / 2}
           r={r}
           fill="none"
-          stroke="#e2e8f0"
+          stroke="rgb(var(--slate-100))"
           strokeWidth={strokeWidth}
         />
         <circle

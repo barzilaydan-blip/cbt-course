@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Send, Users, Paperclip, FileText, X } from "lucide-react";
+import { Send, Users, Paperclip, FileText, X, MessageCircle, Loader2, AlertCircle } from "lucide-react";
 import type { GroupMessage } from "@/types";
 
 interface Props {
@@ -21,6 +21,7 @@ export default function GroupChat({ initialMessages, groupId, groupName, userId 
   const [sending, setSending] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState("");
+  const [sendError, setSendError] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -118,6 +119,9 @@ export default function GroupChat({ initialMessages, groupId, groupName, userId 
     if (error) {
       setInput(text);
       if (fileToSend) setPendingFile(fileToSend);
+      setSendError("ההודעה לא נשלחה. בדוק את החיבור ונסה שוב.");
+    } else {
+      setSendError("");
     }
 
     setSending(false);
@@ -151,25 +155,28 @@ export default function GroupChat({ initialMessages, groupId, groupName, userId 
   }
 
   return (
-    <div className="flex flex-col flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="flex flex-col flex-1 bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
       {/* Header */}
-      <div className="bg-brand-900 text-white px-5 py-4 flex items-center gap-3">
-        <div className="bg-brand-500 rounded-xl p-2">
-          <Users className="w-5 h-5" />
+      <div className="bg-slate-50 border-b border-slate-200 px-5 py-4 flex items-center gap-3">
+        <div className="bg-brand-500 text-white rounded-lg p-2">
+          <Users className="w-5 h-5" aria-hidden="true" />
         </div>
         <div>
-          <h1 className="font-bold text-base">{groupName}</h1>
-          <p className="text-blue-200 text-xs">צ׳אט קבוצתי • Real-time</p>
+          <h1 className="font-bold text-lg text-brand-900 leading-tight">{groupName}</h1>
+          <p className="text-slate-600 text-sm">צ׳אט קבוצתי · ההודעות מתעדכנות בזמן אמת</p>
         </div>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1" style={{ minHeight: 0, maxHeight: "calc(100vh - 280px)" }}>
         {messages.length === 0 && (
-          <div className="flex items-center justify-center h-full text-slate-400 text-sm">
+          <div className="flex items-center justify-center h-full py-16 text-slate-600">
             <div className="text-center">
-              <span className="text-4xl block mb-3">💬</span>
-              היו הראשון לכתוב הודעה בקבוצה
+              <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand-50">
+                <MessageCircle className="w-6 h-6 text-brand-500" aria-hidden="true" />
+              </span>
+              <p className="font-semibold text-slate-800">עדיין אין הודעות בקבוצה</p>
+              <p className="text-sm mt-1">כתוב את ההודעה הראשונה למטה.</p>
             </div>
           </div>
         )}
@@ -177,11 +184,11 @@ export default function GroupChat({ initialMessages, groupId, groupName, userId 
         {grouped.map(({ date, msgs }) => (
           <div key={date}>
             <div className="flex items-center gap-3 my-4">
-              <div className="flex-1 h-px bg-slate-100" />
-              <span className="text-xs text-slate-400 font-medium bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+              <div className="flex-1 h-px bg-slate-200" />
+              <span className="text-xs text-slate-600 font-medium bg-slate-50 px-3 py-1 rounded-full border border-slate-200">
                 {formatDate(msgs[0].created_at)}
               </span>
-              <div className="flex-1 h-px bg-slate-100" />
+              <div className="flex-1 h-px bg-slate-200" />
             </div>
 
             {msgs.map((msg, i) => {
@@ -201,7 +208,7 @@ export default function GroupChat({ initialMessages, groupId, groupName, userId 
                     </div>
                   )}
 
-                  <div className={`max-w-[72%] ${isOwn ? "items-end" : "items-start"} flex flex-col`}>
+                  <div className={`max-w-[85%] sm:max-w-[72%] ${isOwn ? "items-end" : "items-start"} flex flex-col`}>
                     {showSender && !isOwn && (
                       <span className="text-xs text-brand-600 font-semibold mb-0.5 pe-1">
                         {senderName}
@@ -210,7 +217,7 @@ export default function GroupChat({ initialMessages, groupId, groupName, userId 
                     <div className={`rounded-2xl overflow-hidden text-sm leading-relaxed ${
                       isOwn
                         ? "bg-brand-500 text-white rounded-tl-sm"
-                        : "bg-slate-100 text-slate-800 rounded-tr-sm"
+                        : "bg-slate-100 text-slate-900 rounded-tr-sm"
                     }`}>
                       {/* File attachment */}
                       {msg.file_url && isImage && (
@@ -245,7 +252,7 @@ export default function GroupChat({ initialMessages, groupId, groupName, userId 
                       {/* File only, no text — add small padding */}
                       {!msg.content && msg.file_url && !isPdf && <div className="pb-1" />}
                     </div>
-                    <span className="text-xs text-slate-400 mt-0.5 px-1">
+                    <span className="text-xs text-slate-600 mt-0.5 px-1">
                       {formatTime(msg.created_at)}
                     </span>
                   </div>
@@ -275,16 +282,20 @@ export default function GroupChat({ initialMessages, groupId, groupName, userId 
             <span className="flex-1 truncate text-slate-700">{pendingFile.name}</span>
             <button
               onClick={() => setPendingFile(null)}
-              className="text-slate-400 hover:text-red-500 shrink-0"
+              aria-label="הסר את הקובץ המצורף"
+              className="text-slate-600 hover:text-red-700 shrink-0 w-9 h-9 flex items-center justify-center rounded-md hover:bg-white"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>
       )}
 
-      {fileError && (
-        <p className="px-4 pb-1 text-xs text-red-500">{fileError}</p>
+      {(fileError || sendError) && (
+        <p role="alert" className="mx-4 mb-2 flex items-center gap-2 rounded-lg bg-red-50 ring-1 ring-inset ring-red-200 px-3 py-2 text-sm text-red-800">
+          <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
+          {fileError || sendError}
+        </p>
       )}
 
       {/* Input */}
@@ -301,10 +312,11 @@ export default function GroupChat({ initialMessages, groupId, groupName, userId 
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={sending}
-            className="text-slate-400 hover:text-brand-600 transition-colors p-1 shrink-0 mb-1.5 disabled:opacity-40"
+            className="text-slate-600 hover:text-brand-700 hover:bg-slate-100 transition-colors w-11 h-11 flex items-center justify-center rounded-lg shrink-0 disabled:opacity-40"
+            aria-label="צרף תמונה או PDF"
             title="צרף קובץ"
           >
-            <Paperclip className="w-5 h-5" />
+            <Paperclip className="w-5 h-5" aria-hidden="true" />
           </button>
           <textarea
             ref={textareaRef}
@@ -314,20 +326,22 @@ export default function GroupChat({ initialMessages, groupId, groupName, userId 
             placeholder="כתוב הודעה לקבוצה..."
             rows={1}
             disabled={sending}
-            className="flex-1 border border-slate-300 rounded-xl px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50 max-h-28"
+            aria-label="הודעה לקבוצה"
+            className="flex-1 min-h-[44px] border border-slate-300 rounded-lg px-4 py-2.5 text-base resize-none focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 disabled:opacity-50 max-h-28 placeholder:text-slate-500"
             style={{ overflowY: "auto" }}
           />
           <button
             onClick={sendMessage}
             disabled={(!input.trim() && !pendingFile) || sending}
-            className="bg-brand-500 hover:bg-brand-700 disabled:opacity-40 text-white p-2.5 rounded-xl transition-colors shrink-0"
+            className="bg-brand-500 hover:bg-brand-700 disabled:opacity-40 text-white w-11 h-11 flex items-center justify-center rounded-lg transition-colors shrink-0"
+            aria-label={sending ? "שולח..." : "שלח הודעה"}
             title="שלח"
           >
-            <Send className="w-5 h-5 scale-x-[-1]" />
+            {sending ? <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> : <Send className="w-5 h-5 scale-x-[-1]" aria-hidden="true" />}
           </button>
         </div>
-        <p className="text-xs text-slate-400 mt-1.5">
-          Enter לשליחה • Shift+Enter לשורה חדשה • 📎 לצירוף תמונה או PDF
+        <p className="text-xs text-slate-600 mt-1.5">
+          Enter לשליחה · Shift+Enter לשורה חדשה · אפשר לצרף תמונה או PDF
         </p>
       </div>
     </div>

@@ -19,7 +19,7 @@ export default function AdminChatTabs({ pendingCount, chatContent, questionsCont
           onClick={() => setTab("chat")}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
             tab === "chat"
-              ? "bg-brand-900 text-white"
+              ? "bg-brand-500 text-white"
               : "text-slate-600 hover:bg-slate-100"
           }`}
         >
@@ -30,7 +30,7 @@ export default function AdminChatTabs({ pendingCount, chatContent, questionsCont
           onClick={() => setTab("questions")}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
             tab === "questions"
-              ? "bg-brand-900 text-white"
+              ? "bg-brand-500 text-white"
               : "text-slate-600 hover:bg-slate-100"
           }`}
         >

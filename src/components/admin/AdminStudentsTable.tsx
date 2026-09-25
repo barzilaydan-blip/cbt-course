@@ -103,9 +103,10 @@ export default function AdminStudentsTable({ students, groups, groupMap }: Props
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm text-slate-500">סנן לפי קבוצה:</span>
           <select
+            aria-label="סינון לפי קבוצה"
             value={filterGroup}
             onChange={(e) => setFilterGroup(e.target.value)}
-            className="border border-slate-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="border border-slate-300 rounded-lg px-3 min-h-[40px] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
             <option value="all">כל הסטודנטים</option>
             <option value="none">ללא קבוצה</option>
@@ -131,7 +132,7 @@ export default function AdminStudentsTable({ students, groups, groupMap }: Props
 
       <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-brand-900 text-white">
+          <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
             <tr>
               <th className="px-4 py-3 text-right font-semibold">שם</th>
               <th className="px-4 py-3 text-right font-semibold">אימייל</th>
