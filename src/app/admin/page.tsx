@@ -25,12 +25,13 @@ export default async function AdminPage() {
       service.from("profiles").select("id, name, email, role, total_points, group_id, phone, profession"),
       service.from("progress").select("user_id, module_id, points_earned, quiz_completed, practice_completed"),
       service.from("groups").select("*").order("created_at"),
-      service.from("exercise_submissions").select("id").eq("status", "submitted"),
-      service.from("questions").select("id").eq("status", "pending"),
+      service.from("exercise_submissions").select("user_id").eq("status", "submitted"),
+      service.from("questions").select("user_id").eq("status", "pending"),
     ]);
 
   const students = (profiles ?? []).filter((p: RawProfile) => p.role === "student");
   const groupMap = new Map<string, Group>((groups ?? []).map((g: Group) => [g.id, g]));
+  const groupIdByUser = new Map<string, string | null>((profiles ?? []).map((p: RawProfile) => [p.id, p.group_id]));
 
   // Per-group stats
   const groupStats = (groups ?? []).map((g: Group) => {
@@ -43,7 +44,12 @@ export default async function AdminPage() {
       members.some((m: RawProfile) => m.id === p.user_id)
     );
     const completions = memberProgress.filter((p: { practice_completed: boolean }) => p.practice_completed).length;
-    return { id: g.id, name: g.name, memberCount: members.length, avgPoints, completions, isActive: g.is_active };
+    const pendingExercisesInGroup = (pendingExercises ?? []).filter((s: { user_id: string }) => groupIdByUser.get(s.user_id) === g.id).length;
+    const pendingQuestionsInGroup = (pendingQuestions ?? []).filter((q: { user_id: string }) => groupIdByUser.get(q.user_id) === g.id).length;
+    return {
+      id: g.id, name: g.name, memberCount: members.length, avgPoints, completions, isActive: g.is_active,
+      pendingExercises: pendingExercisesInGroup, pendingQuestions: pendingQuestionsInGroup,
+    };
   });
 
   return (

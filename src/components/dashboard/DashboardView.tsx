@@ -222,7 +222,19 @@ function ProgressMap({ sessions, completedCount, overallPct }: Pick<DashboardVie
 }
 
 // ── Aside ────────────────────────────────────────────────────────────────────
-function CourseLinks({ zoomUrl, zoomPassword, nextMeeting }: Pick<DashboardViewProps, "zoomUrl" | "zoomPassword" | "nextMeeting">) {
+function CourseLinks({ zoomUrl, zoomPassword, nextMeeting, hasGroup }: Pick<DashboardViewProps, "zoomUrl" | "zoomPassword" | "nextMeeting" | "hasGroup">) {
+  if (!hasGroup) {
+    return (
+      <section className="surface p-5 space-y-3" aria-labelledby="course-links-title">
+        <h2 id="course-links-title" className="font-bold text-brand-900">מפגשים חיים וסילבוס</h2>
+        <p className="text-sm text-slate-600 flex items-center gap-2 rounded-lg bg-slate-50 border border-slate-200 px-3 py-2.5">
+          <Video className="w-4 h-4 shrink-0" aria-hidden="true" />
+          עדיין לא שויכת לקבוצה — פנה למנהל הקורס
+        </p>
+      </section>
+    );
+  }
+
   return (
     <section className="surface p-5 space-y-4" aria-labelledby="course-links-title">
       <h2 id="course-links-title" className="font-bold text-brand-900">מפגשים חיים וסילבוס</h2>
@@ -343,7 +355,7 @@ export default function DashboardView(props: DashboardViewProps) {
         </div>
 
         <aside className="space-y-5" aria-label="מידע נוסף">
-          <CourseLinks zoomUrl={props.zoomUrl} zoomPassword={props.zoomPassword} nextMeeting={props.nextMeeting} />
+          <CourseLinks zoomUrl={props.zoomUrl} zoomPassword={props.zoomPassword} nextMeeting={props.nextMeeting} hasGroup={hasGroup} />
           {hasGroup && <Leaderboard leaderboard={props.leaderboard} userRank={props.userRank} userPoints={props.userPoints} />}
         </aside>
       </div>

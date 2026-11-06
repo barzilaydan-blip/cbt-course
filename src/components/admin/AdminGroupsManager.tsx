@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Plus, Users, Trash2, Save, CheckCircle, Upload, FileUp, Mail, Calendar } from "lucide-react";
+import { Plus, Users, Trash2, Save, CheckCircle, Upload, FileUp, Mail, Calendar, Video, Link as LinkIcon } from "lucide-react";
 import type { Group, Profile } from "@/types";
 
 interface Props {
@@ -37,6 +37,19 @@ export default function AdminGroupsManager({ initialGroups, students }: Props) {
   const [savingDate, setSavingDate] = useState<string | null>(null);
   const [localDates, setLocalDates] = useState<Record<string, string>>(
     Object.fromEntries(initialGroups.map(g => [g.id, g.course_start_date ?? ""]))
+  );
+  const DAYS = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+  type ScheduleFields = { zoom_url: string; zoom_password: string; meeting_day_he: string; meeting_time: string; syllabus_url: string };
+  const [savingSchedule, setSavingSchedule] = useState<string | null>(null);
+  const [savedSchedule, setSavedSchedule] = useState<string | null>(null);
+  const [localSchedule, setLocalSchedule] = useState<Record<string, ScheduleFields>>(
+    Object.fromEntries(initialGroups.map(g => [g.id, {
+      zoom_url: g.zoom_url ?? "",
+      zoom_password: g.zoom_password ?? "",
+      meeting_day_he: g.meeting_day_he ?? "",
+      meeting_time: g.meeting_time ?? "",
+      syllabus_url: g.syllabus_url ?? "",
+    }]))
   );
   const [importGroupId, setImportGroupId] = useState<string | null>(null);
   const [importRows, setImportRows] = useState<ImportRow[]>([]);
@@ -132,6 +145,24 @@ export default function AdminGroupsManager({ initialGroups, students }: Props) {
     await supabase.from("groups").update({ course_start_date: date }).eq("id", groupId);
     setGroups(groups.map(g => g.id === groupId ? { ...g, course_start_date: date } : g));
     setSavingDate(null);
+    router.refresh();
+  }
+
+  async function saveSchedule(groupId: string) {
+    setSavingSchedule(groupId);
+    const s = localSchedule[groupId];
+    const payload = {
+      zoom_url: s.zoom_url.trim() || null,
+      zoom_password: s.zoom_password.trim() || null,
+      meeting_day_he: s.meeting_day_he.trim() || null,
+      meeting_time: s.meeting_time.trim() || null,
+      syllabus_url: s.syllabus_url.trim() || null,
+    };
+    await supabase.from("groups").update(payload).eq("id", groupId);
+    setGroups(groups.map(g => g.id === groupId ? { ...g, ...payload } : g));
+    setSavingSchedule(null);
+    setSavedSchedule(groupId);
+    setTimeout(() => setSavedSchedule(null), 2000);
     router.refresh();
   }
 
@@ -444,6 +475,84 @@ export default function AdminGroupsManager({ initialGroups, students }: Props) {
                   </span>
                 )}
               </div>
+            </div>
+
+            {/* Zoom + meeting day/time + syllabus — unique per group */}
+            <div className="px-5 py-4 border-b border-slate-100 space-y-3">
+              <p className="text-sm font-medium text-slate-600 flex items-center gap-2">
+                <Video className="w-4 h-4 text-slate-400 shrink-0" />
+                Zoom, יום ושעת מפגשים לקבוצה זו
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">יום קבוע</label>
+                  <select
+                    value={localSchedule[group.id]?.meeting_day_he ?? ""}
+                    onChange={(e) => setLocalSchedule(prev => ({ ...prev, [group.id]: { ...prev[group.id], meeting_day_he: e.target.value } }))}
+                    className="input-he"
+                  >
+                    <option value="">לא נקבע</option>
+                    {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">שעה קבועה</label>
+                  <input
+                    type="time"
+                    value={localSchedule[group.id]?.meeting_time ?? ""}
+                    onChange={(e) => setLocalSchedule(prev => ({ ...prev, [group.id]: { ...prev[group.id], meeting_time: e.target.value } }))}
+                    className="input-he"
+                    dir="ltr"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">קישור Zoom</label>
+                  <input
+                    type="url"
+                    placeholder="https://zoom.us/j/..."
+                    value={localSchedule[group.id]?.zoom_url ?? ""}
+                    onChange={(e) => setLocalSchedule(prev => ({ ...prev, [group.id]: { ...prev[group.id], zoom_url: e.target.value } }))}
+                    className="input-he"
+                    dir="ltr"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">סיסמת Zoom</label>
+                  <input
+                    type="text"
+                    placeholder="123456"
+                    value={localSchedule[group.id]?.zoom_password ?? ""}
+                    onChange={(e) => setLocalSchedule(prev => ({ ...prev, [group.id]: { ...prev[group.id], zoom_password: e.target.value } }))}
+                    className="input-he"
+                    dir="ltr"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-500 mb-1 flex items-center gap-1">
+                    <LinkIcon className="w-3 h-3" />
+                    קישור לסילבוס
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://drive.google.com/..."
+                    value={localSchedule[group.id]?.syllabus_url ?? ""}
+                    onChange={(e) => setLocalSchedule(prev => ({ ...prev, [group.id]: { ...prev[group.id], syllabus_url: e.target.value } }))}
+                    className="input-he"
+                    dir="ltr"
+                  />
+                </div>
+              </div>
+              <button
+                onClick={() => saveSchedule(group.id)}
+                disabled={savingSchedule === group.id}
+                className="flex items-center gap-2 bg-brand-500 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
+              >
+                {savedSchedule === group.id ? (
+                  <><CheckCircle className="w-4 h-4" /> נשמר!</>
+                ) : (
+                  <><Save className="w-4 h-4" /> {savingSchedule === group.id ? "שומר..." : "שמור לוח זמנים"}</>
+                )}
+              </button>
             </div>
 
             {/* Student assignment */}

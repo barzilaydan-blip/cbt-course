@@ -7,7 +7,7 @@ import AdminQuestions from "@/components/admin/AdminQuestions";
 import AdminChatTabs from "@/components/admin/AdminChatTabs";
 import type { Group, GroupMessage, Question } from "@/types";
 
-export default async function AdminChatPage() {
+export default async function AdminChatPage({ searchParams }: { searchParams: { groupId?: string; tab?: string } }) {
   const supabase = await createClient();
   const service = createServiceClient();
 
@@ -15,7 +15,7 @@ export default async function AdminChatPage() {
     service.from("groups").select("*").order("created_at"),
     service
       .from("questions")
-      .select("*, profiles(name, email)")
+      .select("*, profiles(name, email, group_id)")
       .order("created_at", { ascending: false }),
   ]);
 
@@ -43,6 +43,7 @@ export default async function AdminChatPage() {
 
       <AdminChatTabs
         pendingCount={pendingCount}
+        initialTab={searchParams.tab === "questions" ? "questions" : "chat"}
         chatContent={
           <AdminChatMonitor
             groups={(groups ?? []) as Group[]}
@@ -50,7 +51,11 @@ export default async function AdminChatPage() {
           />
         }
         questionsContent={
-          <AdminQuestions initialQuestions={(questions ?? []) as Question[]} />
+          <AdminQuestions
+            initialQuestions={(questions ?? []) as Question[]}
+            groups={(groups ?? []).map((g: Group) => ({ id: g.id, name: g.name }))}
+            initialGroupId={searchParams.groupId ?? null}
+          />
         }
       />
     </div>

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { CheckCircle, Clock, ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
+import AdminGroupFilter from "./AdminGroupFilter";
 import type { ExerciseSubmission } from "@/types";
 
 const CLINICAL_QUESTIONS = [
@@ -39,17 +40,24 @@ const FORMULATION_FIELDS = [
 ];
 
 interface SubmissionWithProfile extends ExerciseSubmission {
-  profiles?: { name: string; email: string } | null;
+  profiles?: { name: string; email: string; group_id: string | null } | null;
   modules?: { order_number: number; title_he: string } | null;
 }
 
 const REVIEW_MODULES = [1, 4, 9]; // only these go to the instructor
 
-export default function AdminExercisesReviewer({ submissions }: { submissions: SubmissionWithProfile[] }) {
+interface Props {
+  submissions: SubmissionWithProfile[];
+  groups: { id: string; name: string }[];
+  initialGroupId?: string | null;
+}
+
+export default function AdminExercisesReviewer({ submissions, groups, initialGroupId }: Props) {
   // Filter to only submissions that require instructor review
   const reviewable = submissions.filter(s => REVIEW_MODULES.includes(s.modules?.order_number ?? 0));
 
   const [filter, setFilter] = useState<"all" | "submitted" | "reviewed">("submitted");
+  const [groupFilter, setGroupFilter] = useState<string | null>(initialGroupId ?? null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [feedbacks, setFeedbacks] = useState<Record<string, string>>({});
   const [points, setPoints] = useState<Record<string, number>>({});
@@ -58,7 +66,8 @@ export default function AdminExercisesReviewer({ submissions }: { submissions: S
   const [copied, setCopied] = useState<string | null>(null);
 
   const filtered = reviewable.filter(s =>
-    filter === "all" ? true : s.status === filter
+    (filter === "all" ? true : s.status === filter) &&
+    (groupFilter === null ? true : s.profiles?.group_id === groupFilter)
   );
 
   function initExpand(sub: SubmissionWithProfile) {
@@ -104,9 +113,14 @@ export default function AdminExercisesReviewer({ submissions }: { submissions: S
   }
 
   const pendingCount = reviewable.filter(s => s.status === "submitted").length;
+  const pendingByGroup = (groupId: string | null) =>
+    reviewable.filter(s => s.status === "submitted" && (groupId === null || s.profiles?.group_id === groupId)).length;
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col lg:flex-row gap-4">
+      <AdminGroupFilter groups={groups} activeGroupId={groupFilter} onSelect={setGroupFilter} badge={pendingByGroup} />
+
+      <div className="flex-1 min-w-0 space-y-4">
       {/* Filter tabs */}
       <div className="flex gap-2 border-b border-slate-200 pb-1">
         {([["submitted", `ממתינות (${pendingCount})`], ["reviewed", "נבדקו"], ["all", "הכל"]] as [typeof filter, string][]).map(([val, label]) => (
@@ -412,6 +426,7 @@ export default function AdminExercisesReviewer({ submissions }: { submissions: S
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

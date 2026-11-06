@@ -6,10 +6,11 @@ interface Props {
   pendingCount: number;
   chatContent: React.ReactNode;
   questionsContent: React.ReactNode;
+  initialTab?: "chat" | "questions";
 }
 
-export default function AdminChatTabs({ pendingCount, chatContent, questionsContent }: Props) {
-  const [tab, setTab] = useState<"chat" | "questions">("chat");
+export default function AdminChatTabs({ pendingCount, chatContent, questionsContent, initialTab = "chat" }: Props) {
+  const [tab, setTab] = useState<"chat" | "questions">(initialTab);
 
   return (
     <div>

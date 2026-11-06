@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Activity, ChevronLeft, Clock, Users } from "lucide-react";
+import AdminGroupFilter from "@/components/admin/AdminGroupFilter";
 import type { Group } from "@/types";
 
 function formatDuration(seconds: number | null): string {
@@ -143,34 +144,29 @@ export default async function ActivityPage({
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="flex items-center gap-1.5">
-          <span className="text-sm text-slate-500">קבוצה:</span>
-          <div className="flex gap-1">
-            <Link href={buildUrl({ groupId: "all" })}
-              className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${filterGroupId === "all" ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
-              הכל
-            </Link>
-            {(groups ?? []).map((g: Group) => (
-              <Link key={g.id} href={buildUrl({ groupId: g.id })}
-                className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${filterGroupId === g.id ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
-                {g.name}
-              </Link>
-            ))}
-          </div>
-        </div>
+      <div className="flex flex-col lg:flex-row gap-5">
+        <AdminGroupFilter
+          groups={(groups ?? []) as { id: string; name: string }[]}
+          activeGroupId={filterGroupId === "all" ? null : filterGroupId}
+          hrefFor={(id) => buildUrl({ groupId: id ?? "all" })}
+          badge={(groupId) => allVisits.filter((v) => {
+            if (v.exited_at || v.entered_at < twoHoursAgo) return false;
+            if (groupId === null) return true;
+            return profileMap.get(v.user_id)?.group_id === groupId;
+          }).length}
+        />
 
-        <div className="flex items-center gap-1.5">
-          <span className="text-sm text-slate-500">תקופה:</span>
-          <div className="flex gap-1">
-            {[7, 14, 30, 90].map((d) => (
-              <Link key={d} href={buildUrl({ days: String(d) })}
-                className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${filterDays === d ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
-                {d} ימים
-              </Link>
-            ))}
-          </div>
+        <div className="flex-1 min-w-0 space-y-6">
+      {/* Period filter */}
+      <div className="flex items-center gap-1.5">
+        <span className="text-sm text-slate-500">תקופה:</span>
+        <div className="flex gap-1">
+          {[7, 14, 30, 90].map((d) => (
+            <Link key={d} href={buildUrl({ days: String(d) })}
+              className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${filterDays === d ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
+              {d} ימים
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -258,6 +254,8 @@ export default async function ActivityPage({
             מציג {filtered.length} כניסות מהימים האחרונים
           </div>
         )}
+      </div>
+        </div>
       </div>
     </div>
   );

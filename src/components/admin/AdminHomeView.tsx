@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import {
   Activity, AlertTriangle, BarChart3, BookOpen, CheckCircle2, ChevronLeft, ClipboardList, FileText,
-  FolderOpen, Headphones, MessageCircle, ShieldCheck, SlidersHorizontal, Users, Video, type LucideIcon,
+  FolderOpen, Headphones, MessageCircle, ShieldCheck, Users, Video, type LucideIcon,
 } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { Module } from "@/types";
@@ -14,7 +14,7 @@ export interface AdminHomeViewProps {
   practiceCompletions: number;
   pendingExercises: number;
   pendingQuestions: number;
-  groupStats: { id: string; name: string; memberCount: number; avgPoints: number; completions: number; isActive: boolean }[];
+  groupStats: { id: string; name: string; memberCount: number; avgPoints: number; completions: number; isActive: boolean; pendingExercises: number; pendingQuestions: number }[];
   modules: Module[];
   /** The students table (client component) */
   studentsTable: ReactNode;
@@ -81,16 +81,9 @@ export default function AdminHomeView(p: AdminHomeViewProps) {
 
   const groups: { title: string; links: ActionLink[] }[] = [
     {
-      title: "קורס ומפגשים",
-      links: [
-        { href: "/admin/settings", icon: SlidersHorizontal, label: "הגדרות קורס", desc: "Zoom, סילבוס, יום ושעת מפגשים" },
-        { href: "/admin/quiz-stats", icon: BarChart3, label: "ניתוח חידונים", desc: "שאלות שמעל 50% ענו עליהן בצורה שגויה" },
-      ],
-    },
-    {
       title: "משתתפים וקבוצות",
       links: [
-        { href: "/admin/groups", icon: Users, label: "ניהול קבוצות", desc: "יצירת קבוצות ושיוך משתתפים" },
+        { href: "/admin/groups", icon: Users, label: "ניהול קבוצות", desc: "קבוצות, שיוך משתתפים, Zoom ולוח זמנים לכל קבוצה" },
         { href: "/admin/approved", icon: ShieldCheck, label: "גישה — מיילים מאושרים", desc: "ייבוא מיילים מ-Smoove לאישור גישה" },
         { href: "/admin/activity", icon: Activity, label: "מעקב נוכחות", desc: "זמני כניסה ושהייה של משתתפים" },
       ],
@@ -99,6 +92,7 @@ export default function AdminHomeView(p: AdminHomeViewProps) {
       title: "תרגילים ומשוב",
       links: [
         { href: "/admin/exercises", icon: ClipboardList, label: "תרגילים קליניים", desc: "בדיקת הגשות ומתן משוב", badge: p.pendingExercises, badgeLabel: "ממתינים" },
+        { href: "/admin/quiz-stats", icon: BarChart3, label: "ניתוח חידונים", desc: "שאלות שמעל 50% ענו עליהן בצורה שגויה" },
       ],
     },
     {
@@ -122,18 +116,20 @@ export default function AdminHomeView(p: AdminHomeViewProps) {
             ממתין לטיפולך
           </p>
           <div className="flex flex-wrap gap-2">
-            {p.pendingExercises > 0 && (
-              <Link href="/admin/exercises" className="inline-flex items-center gap-2 min-h-[40px] bg-white border border-amber-300 text-amber-900 text-sm font-semibold px-3.5 rounded-lg hover:bg-amber-100 transition-colors">
-                <span className="bg-amber-700 text-white text-xs font-bold min-w-[22px] h-[22px] px-1 rounded-full flex items-center justify-center">{p.pendingExercises}</span>
-                תרגילים לבדיקה
-              </Link>
-            )}
-            {p.pendingQuestions > 0 && (
-              <Link href="/admin/chat" className="inline-flex items-center gap-2 min-h-[40px] bg-white border border-amber-300 text-amber-900 text-sm font-semibold px-3.5 rounded-lg hover:bg-amber-100 transition-colors">
-                <span className="bg-amber-700 text-white text-xs font-bold min-w-[22px] h-[22px] px-1 rounded-full flex items-center justify-center">{p.pendingQuestions}</span>
-                שאלות למענה
-              </Link>
-            )}
+            {p.groupStats.flatMap((g) => [
+              g.pendingExercises > 0 && (
+                <Link key={`${g.id}-ex`} href={`/admin/exercises?groupId=${g.id}`} className="inline-flex items-center gap-2 min-h-[40px] bg-white border border-amber-300 text-amber-900 text-sm font-semibold px-3.5 rounded-lg hover:bg-amber-100 transition-colors">
+                  <span className="bg-amber-700 text-white text-xs font-bold min-w-[22px] h-[22px] px-1 rounded-full flex items-center justify-center">{g.pendingExercises}</span>
+                  {g.name} · תרגילים לבדיקה
+                </Link>
+              ),
+              g.pendingQuestions > 0 && (
+                <Link key={`${g.id}-q`} href={`/admin/chat?groupId=${g.id}&tab=questions`} className="inline-flex items-center gap-2 min-h-[40px] bg-white border border-amber-300 text-amber-900 text-sm font-semibold px-3.5 rounded-lg hover:bg-amber-100 transition-colors">
+                  <span className="bg-amber-700 text-white text-xs font-bold min-w-[22px] h-[22px] px-1 rounded-full flex items-center justify-center">{g.pendingQuestions}</span>
+                  {g.name} · שאלות למענה
+                </Link>
+              ),
+            ])}
           </div>
         </section>
       ) : (

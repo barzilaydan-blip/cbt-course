@@ -1,21 +1,28 @@
 "use client";
 import { useState } from "react";
 import { CheckCircle, Clock, ChevronDown, ChevronUp, Send } from "lucide-react";
+import AdminGroupFilter from "./AdminGroupFilter";
 import type { Question } from "@/types";
 
 interface Props {
   initialQuestions: Question[];
+  groups: { id: string; name: string }[];
+  initialGroupId?: string | null;
 }
 
-export default function AdminQuestions({ initialQuestions }: Props) {
+export default function AdminQuestions({ initialQuestions, groups, initialGroupId }: Props) {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [replies, setReplies] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "answered">("pending");
+  const [groupFilter, setGroupFilter] = useState<string | null>(initialGroupId ?? null);
+
+  const groupMap = new Map(groups.map(g => [g.id, g.name]));
 
   const filtered = questions.filter(q =>
-    filter === "all" ? true : q.status === filter
+    (filter === "all" ? true : q.status === filter) &&
+    (groupFilter === null ? true : q.profiles?.group_id === groupFilter)
   );
 
   function formatTime(iso: string) {
@@ -63,9 +70,14 @@ export default function AdminQuestions({ initialQuestions }: Props) {
   }
 
   const pendingCount = questions.filter(q => q.status === "pending").length;
+  const pendingByGroup = (groupId: string | null) =>
+    questions.filter(q => q.status === "pending" && (groupId === null || q.profiles?.group_id === groupId)).length;
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col lg:flex-row gap-4">
+      <AdminGroupFilter groups={groups} activeGroupId={groupFilter} onSelect={setGroupFilter} badge={pendingByGroup} />
+
+      <div className="flex-1 min-w-0 space-y-4">
       {/* Filter tabs */}
       <div className="flex items-center gap-2">
         {(["pending", "answered", "all"] as const).map(f => (
@@ -121,6 +133,11 @@ export default function AdminQuestions({ initialQuestions }: Props) {
                   }`}>
                     {q.type === "professional" ? "מקצועית" : "טכנית"}
                   </span>
+                  {q.profiles?.group_id && groupMap.get(q.profiles.group_id) && (
+                    <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-slate-100 text-slate-600">
+                      {groupMap.get(q.profiles.group_id)}
+                    </span>
+                  )}
                   <span className="text-xs text-slate-400">{formatTime(q.created_at)}</span>
                 </div>
                 <p className="text-sm text-slate-700 line-clamp-2 leading-relaxed">{q.content}</p>
@@ -180,6 +197,7 @@ export default function AdminQuestions({ initialQuestions }: Props) {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

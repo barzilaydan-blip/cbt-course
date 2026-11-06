@@ -13,8 +13,8 @@ import { fakeModule } from "../mock";
 import type { Group, GroupMessage, Module, Quiz } from "@/types";
 
 const groups: Group[] = [
-  { id: "g1", name: "מחזור אביב 2026", is_active: true, course_start_date: "2026-03-01", created_at: "2026-01-01" },
-  { id: "g2", name: "מחזור סתיו 2026", is_active: false, course_start_date: null, created_at: "2026-01-01" },
+  { id: "g1", name: "מחזור אביב 2026", is_active: true, course_start_date: "2026-03-01", zoom_url: "https://zoom.us/j/123", zoom_password: "1234", meeting_day_he: "שלישי", meeting_time: "18:00", syllabus_url: null, created_at: "2026-01-01" },
+  { id: "g2", name: "מחזור סתיו 2026", is_active: false, course_start_date: null, zoom_url: null, zoom_password: null, meeting_day_he: null, meeting_time: null, syllabus_url: null, created_at: "2026-01-01" },
 ];
 
 const mods: Module[] = [
@@ -52,8 +52,8 @@ export default function Page({ params }: { params: { screen: string } }) {
             studentsCount={3} groupsCount={2} modulesCount={3} practiceCompletions={12}
             pendingExercises={4} pendingQuestions={2}
             groupStats={[
-              { id: "g1", name: "מחזור אביב 2026", memberCount: 2, avgPoints: 312, completions: 9, isActive: true },
-              { id: "g2", name: "מחזור סתיו 2026", memberCount: 0, avgPoints: 0, completions: 0, isActive: false },
+              { id: "g1", name: "מחזור אביב 2026", memberCount: 2, avgPoints: 312, completions: 9, isActive: true, pendingExercises: 3, pendingQuestions: 1 },
+              { id: "g2", name: "מחזור סתיו 2026", memberCount: 0, avgPoints: 0, completions: 0, isActive: false, pendingExercises: 0, pendingQuestions: 0 },
             ]}
             modules={mods}
             studentsTable={<AdminStudentsTable students={students} groups={groups} groupMap={new Map(groups.map((g) => [g.id, g]))} />}

@@ -38,6 +38,11 @@ export interface Group {
   name: string;
   is_active: boolean;
   course_start_date: string | null;
+  zoom_url: string | null;
+  zoom_password: string | null;
+  meeting_day_he: string | null;
+  meeting_time: string | null;
+  syllabus_url: string | null;
   created_at: string;
 }
 
@@ -131,7 +136,7 @@ export interface ExerciseSubmission {
   submitted_at: string;
   reviewed_at: string | null;
   created_at: string;
-  profiles?: { name: string; email: string } | null;
+  profiles?: { name: string; email: string; group_id: string | null } | null;
   modules?: { order_number: number; title_he: string } | null;
 }
 
@@ -220,7 +225,7 @@ export interface Question {
   admin_reply: string | null;
   answered_at: string | null;
   created_at: string;
-  profiles?: { name: string; email: string } | null;
+  profiles?: { name: string; email: string; group_id: string | null } | null;
 }
 
 // Points per activity

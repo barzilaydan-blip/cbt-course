@@ -6,7 +6,7 @@ import { AlertTriangle, ChevronLeft } from "lucide-react";
 import ExerciseFeedbackBanner from "@/components/dashboard/ExerciseFeedbackBanner";
 import DashboardView, { type SessionVM } from "@/components/dashboard/DashboardView";
 import { moduleCompletion, isModuleAccessible } from "@/lib/utils";
-import type { Module, Progress, CourseSettings } from "@/types";
+import type { Module, Progress } from "@/types";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -60,20 +60,22 @@ export default async function DashboardPage() {
   const [
     { data: modules },
     { data: progressList },
-    { data: settings },
+    { data: groupSchedule },
     { data: exerciseSubs },
     { data: groupMembers },
   ] = await Promise.all([
     service.from("modules").select("*").eq("is_published", true).order("order_number"),
     service.from("progress").select("*").eq("user_id", user.id),
-    service.from("course_settings").select("*").eq("id", 1).maybeSingle(),
+    groupId
+      ? service.from("groups").select("zoom_url, zoom_password, meeting_day_he, meeting_time").eq("id", groupId).maybeSingle()
+      : Promise.resolve({ data: null }),
     service.from("exercise_submissions").select("id, module_id, status").eq("user_id", user.id),
     groupId
       ? service.from("profiles").select("id, name, total_points").eq("group_id", groupId).eq("role", "student").order("total_points", { ascending: false })
       : Promise.resolve({ data: [] }),
   ]);
 
-  const courseSettings = settings as CourseSettings | null;
+  const courseSettings = groupSchedule as { zoom_url: string | null; zoom_password: string | null; meeting_day_he: string | null; meeting_time: string | null } | null;
 
   const leaderboard = ((groupMembers ?? []) as Array<{ id: string; name: string; total_points: number }>).slice(0, 3);
   const userGroupRank = (groupMembers ?? []).findIndex((m: { id: string }) => m.id === user.id) + 1;
