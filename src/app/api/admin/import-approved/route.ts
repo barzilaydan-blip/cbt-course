@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
   if (!file) return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+  const groupId = (formData.get("groupId") as string | null) || null;
 
   const text = await file.text();
   const lines = text.trim().split(/\r?\n/);
@@ -55,6 +56,7 @@ export async function POST(req: NextRequest) {
     email,
     status: "active",
     source: "csv_import",
+    group_id: groupId,
   }));
 
   const { error } = await service

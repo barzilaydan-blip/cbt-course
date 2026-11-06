@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
   // Step 3: Check whitelist
   const { data: entry } = await service
     .from("approved_emails")
-    .select("id, status, linked_user_id")
+    .select("id, status, linked_user_id, group_id")
     .eq("email", normalizedEmail)
     .in("status", ["active", "used"])
     .maybeSingle();
@@ -81,6 +81,7 @@ export async function GET(request: NextRequest) {
         email: normalizedEmail,
         name: user.user_metadata?.full_name || user.user_metadata?.name || "",
         role: "student",
+        group_id: entry.group_id ?? null,
       },
       { onConflict: "id", ignoreDuplicates: true }
     );

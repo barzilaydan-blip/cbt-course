@@ -1,7 +1,5 @@
 import PreviewShell from "../PreviewShell";
 import { notFound } from "next/navigation";
-import AdminHomeView from "@/components/admin/AdminHomeView";
-import AdminStudentsTable from "@/components/admin/AdminStudentsTable";
 import GroupChat from "@/components/chat/GroupChat";
 import FormulationForm from "@/components/formulation/FormulationForm";
 import MatchingGame from "@/components/practice/MatchingGame";
@@ -10,24 +8,7 @@ import QuizEngine from "@/components/quiz/QuizEngine";
 import LoginPage from "@/app/page";
 import { Users } from "lucide-react";
 import { fakeModule } from "../mock";
-import type { Group, GroupMessage, Module, Quiz } from "@/types";
-
-const groups: Group[] = [
-  { id: "g1", name: "מחזור אביב 2026", is_active: true, course_start_date: "2026-03-01", zoom_url: "https://zoom.us/j/123", zoom_password: "1234", meeting_day_he: "שלישי", meeting_time: "18:00", syllabus_url: null, created_at: "2026-01-01" },
-  { id: "g2", name: "מחזור סתיו 2026", is_active: false, course_start_date: null, zoom_url: null, zoom_password: null, meeting_day_he: null, meeting_time: null, syllabus_url: null, created_at: "2026-01-01" },
-];
-
-const mods: Module[] = [
-  { ...fakeModule, id: "a", order_number: 1, title_he: "היכרות והמודל הקוגניטיבי", video_url: "x", article_url: "x", is_published: true },
-  { ...fakeModule, id: "b", order_number: 2, title_he: "זיהוי מחשבות אוטומטיות", video_url: "x", article_url: null, podcast_url: null, is_published: true },
-  { ...fakeModule, id: "c", order_number: 3, title_he: "אתגור מחשבות", video_url: null, article_url: null, podcast_url: null, is_published: false },
-];
-
-const students = [
-  { id: "s1", name: "דנה כהן", email: "dana@example.com", role: "student", total_points: 245, group_id: "g1", phone: "050-1234567", profession: "פסיכולוגית קלינית" },
-  { id: "s2", name: "אורי שמעוני", email: "uri@example.com", role: "student", total_points: 380, group_id: "g1", phone: null, profession: "עובד סוציאלי" },
-  { id: "s3", name: "נועה לוי", email: "noa@example.com", role: "student", total_points: 120, group_id: null, phone: null, profession: null },
-];
+import type { GroupMessage, Quiz } from "@/types";
 
 const now = new Date().toISOString();
 const messages = [
@@ -45,27 +26,6 @@ const quiz: Quiz = {
 
 export default function Page({ params }: { params: { screen: string } }) {
   switch (params.screen) {
-    case "admin":
-      return (
-        <PreviewShell admin>
-          <AdminHomeView
-            studentsCount={3} groupsCount={2} modulesCount={3} practiceCompletions={12}
-            pendingExercises={4} pendingQuestions={2}
-            groupStats={[
-              { id: "g1", name: "מחזור אביב 2026", memberCount: 2, avgPoints: 312, completions: 9, isActive: true, pendingExercises: 3, pendingQuestions: 1 },
-              { id: "g2", name: "מחזור סתיו 2026", memberCount: 0, avgPoints: 0, completions: 0, isActive: false, pendingExercises: 0, pendingQuestions: 0 },
-            ]}
-            modules={mods}
-            studentsTable={<AdminStudentsTable students={students} groups={groups} groupMap={new Map(groups.map((g) => [g.id, g]))} />}
-          />
-        </PreviewShell>
-      );
-    case "admin-clear":
-      return (
-        <PreviewShell admin>
-          <AdminHomeView studentsCount={0} groupsCount={0} modulesCount={0} practiceCompletions={0} pendingExercises={0} pendingQuestions={0} groupStats={[]} modules={[]} studentsTable={null} />
-        </PreviewShell>
-      );
     case "chat":
       return (
         <PreviewShell width="max-w-4xl">

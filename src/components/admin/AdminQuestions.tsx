@@ -8,15 +8,17 @@ interface Props {
   initialQuestions: Question[];
   groups: { id: string; name: string }[];
   initialGroupId?: string | null;
+  /** When set, the group picker is hidden and questions are always scoped to this group (used inside a group's own page). */
+  lockedGroupId?: string;
 }
 
-export default function AdminQuestions({ initialQuestions, groups, initialGroupId }: Props) {
+export default function AdminQuestions({ initialQuestions, groups, initialGroupId, lockedGroupId }: Props) {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [replies, setReplies] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "answered">("pending");
-  const [groupFilter, setGroupFilter] = useState<string | null>(initialGroupId ?? null);
+  const [groupFilter, setGroupFilter] = useState<string | null>(lockedGroupId ?? initialGroupId ?? null);
 
   const groupMap = new Map(groups.map(g => [g.id, g.name]));
 
@@ -75,7 +77,9 @@ export default function AdminQuestions({ initialQuestions, groups, initialGroupI
 
   return (
     <div className="flex flex-col lg:flex-row gap-4">
-      <AdminGroupFilter groups={groups} activeGroupId={groupFilter} onSelect={setGroupFilter} badge={pendingByGroup} />
+      {!lockedGroupId && (
+        <AdminGroupFilter groups={groups} activeGroupId={groupFilter} onSelect={setGroupFilter} badge={pendingByGroup} />
+      )}
 
       <div className="flex-1 min-w-0 space-y-4">
       {/* Filter tabs */}
@@ -133,7 +137,7 @@ export default function AdminQuestions({ initialQuestions, groups, initialGroupI
                   }`}>
                     {q.type === "professional" ? "מקצועית" : "טכנית"}
                   </span>
-                  {q.profiles?.group_id && groupMap.get(q.profiles.group_id) && (
+                  {!lockedGroupId && q.profiles?.group_id && groupMap.get(q.profiles.group_id) && (
                     <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-slate-100 text-slate-600">
                       {groupMap.get(q.profiles.group_id)}
                     </span>

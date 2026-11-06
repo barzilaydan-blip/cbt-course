@@ -9,19 +9,24 @@ interface ApprovedEmailRow {
   source: string;
   approved_at: string;
   used_at: string | null;
+  group_id?: string | null;
 }
 
 interface Props {
   initialEmails: ApprovedEmailRow[];
+  /** When set, new imports/additions are tagged to this group and auto-assign the student on first login. */
+  groupId?: string;
 }
 
-export default function AdminApprovedEmails({ initialEmails }: Props) {
+export default function AdminApprovedEmails({ initialEmails, groupId }: Props) {
   const [emails, setEmails] = useState<ApprovedEmailRow[]>(initialEmails);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<string | null>(null);
   const [newEmail, setNewEmail] = useState("");
   const [addingEmail, setAddingEmail] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const listUrl = groupId ? `/api/admin/approved-emails?groupId=${groupId}` : "/api/admin/approved-emails";
 
   async function handleFileImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -32,6 +37,7 @@ export default function AdminApprovedEmails({ initialEmails }: Props) {
 
     const formData = new FormData();
     formData.append("file", file);
+    if (groupId) formData.append("groupId", groupId);
 
     const res = await fetch("/api/admin/import-approved", {
       method: "POST",
@@ -44,7 +50,7 @@ export default function AdminApprovedEmails({ initialEmails }: Props) {
     } else {
       setImportResult(`✓ נוספו ${data.imported} מיילים לרשימת המאושרים`);
       // Refresh list
-      const listRes = await fetch("/api/admin/approved-emails");
+      const listRes = await fetch(listUrl);
       const listData = await listRes.json();
       if (listData.data) setEmails(listData.data);
     }
@@ -59,12 +65,12 @@ export default function AdminApprovedEmails({ initialEmails }: Props) {
     const res = await fetch("/api/admin/approved-emails", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: newEmail.trim() }),
+      body: JSON.stringify({ email: newEmail.trim(), groupId }),
     });
     const data = await res.json();
     if (data.success) {
       setNewEmail("");
-      const listRes = await fetch("/api/admin/approved-emails");
+      const listRes = await fetch(listUrl);
       const listData = await listRes.json();
       if (listData.data) setEmails(listData.data);
     }
@@ -113,6 +119,7 @@ export default function AdminApprovedEmails({ initialEmails }: Props) {
         </h2>
         <p className="text-xs text-slate-500 mb-4">
           ייצא קובץ CSV מ-Smoove עם עמודת Email והעלה אותו כאן. מיילים קיימים יישמרו ללא שינוי.
+          {groupId && " מיילים חדשים ישויכו אוטומטית לקבוצה זו בכניסה הראשונה."}
         </p>
 
         <div className="flex gap-3 flex-wrap">

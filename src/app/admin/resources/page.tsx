@@ -17,9 +17,9 @@ export default async function AdminResourcesPage() {
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
-        <Link href="/admin" className="text-sm text-slate-500 hover:text-brand-500 flex items-center gap-1 mb-2">
+        <Link href="/admin/content" className="text-sm text-slate-500 hover:text-brand-500 flex items-center gap-1 mb-2">
           <ChevronLeft className="w-4 h-4 rotate-180" />
-          חזור לניהול
+          חזור לניהול משאבים
         </Link>
         <h1 className="text-2xl font-bold text-brand-900">ניהול משאבים</h1>
         <p className="text-slate-500 mt-1 text-sm">העלה קבצים ושאלונים קליניים לסטודנטים</p>

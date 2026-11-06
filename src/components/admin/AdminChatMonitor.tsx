@@ -111,45 +111,47 @@ export default function AdminChatMonitor({ groups, initialMessages }: Props) {
 
   return (
     <div className="flex gap-4" style={{ height: "calc(100vh - 220px)" }}>
-      {/* Sidebar — groups */}
-      <div className="w-56 shrink-0 bg-white rounded-xl border border-slate-200 overflow-y-auto">
-        <div className="p-3 border-b border-slate-100">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">קבוצות</p>
+      {/* Sidebar — groups (hidden when the group is already fixed by the page, e.g. inside a group's own tab) */}
+      {groups.length > 1 && (
+        <div className="w-56 shrink-0 bg-white rounded-xl border border-slate-200 overflow-y-auto">
+          <div className="p-3 border-b border-slate-100">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">קבוצות</p>
+          </div>
+          {groups.map((g) => {
+            const unread = getUnreadCount(g.id);
+            const isActive = activeGroup === g.id;
+            return (
+              <button
+                key={g.id}
+                onClick={() => openGroup(g.id)}
+                className={`w-full text-right px-4 py-3 text-sm transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between gap-2 ${
+                  isActive
+                    ? "bg-brand-50 text-brand-800 font-semibold"
+                    : "hover:bg-slate-50 text-slate-700"
+                }`}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <MessageCircle className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                  <span className="truncate">{g.name}</span>
+                </div>
+                {unread > 0 && !isActive && (
+                  <span className="shrink-0 bg-brand-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                    {unread}
+                  </span>
+                )}
+                {(unread === 0 || isActive) && (
+                  <span className="text-xs text-slate-300 shrink-0">
+                    {messages.filter(m => m.group_id === g.id).length}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
-        {groups.length === 0 && (
-          <p className="text-xs text-slate-400 p-4">אין קבוצות</p>
-        )}
-        {groups.map((g) => {
-          const unread = getUnreadCount(g.id);
-          const isActive = activeGroup === g.id;
-          return (
-            <button
-              key={g.id}
-              onClick={() => openGroup(g.id)}
-              className={`w-full text-right px-4 py-3 text-sm transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between gap-2 ${
-                isActive
-                  ? "bg-brand-50 text-brand-800 font-semibold"
-                  : "hover:bg-slate-50 text-slate-700"
-              }`}
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <MessageCircle className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                <span className="truncate">{g.name}</span>
-              </div>
-              {unread > 0 && !isActive && (
-                <span className="shrink-0 bg-brand-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                  {unread}
-                </span>
-              )}
-              {(unread === 0 || isActive) && (
-                <span className="text-xs text-slate-300 shrink-0">
-                  {messages.filter(m => m.group_id === g.id).length}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+      )}
+      {groups.length === 0 && (
+        <p className="text-xs text-slate-400 p-4">אין קבוצות</p>
+      )}
 
       {/* Chat view */}
       <div className="flex-1 bg-white rounded-xl border border-slate-200 flex flex-col overflow-hidden">

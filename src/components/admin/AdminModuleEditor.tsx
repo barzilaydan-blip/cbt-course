@@ -96,9 +96,9 @@ export default function AdminModuleEditor({ mod, initialQuiz }: Props) {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <Link href="/admin" className="text-sm text-slate-500 hover:text-brand-500 flex items-center gap-1 mb-1">
+          <Link href="/admin/modules" className="text-sm text-slate-500 hover:text-brand-500 flex items-center gap-1 mb-1">
             <ChevronLeft className="w-4 h-4 rotate-180" />
-            חזור לניהול
+            חזור לניהול מפגשים
           </Link>
           <h1 className="text-xl font-bold text-brand-900">
             עריכת מפגש {mod.order_number}

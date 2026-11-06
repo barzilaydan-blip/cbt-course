@@ -10,6 +10,7 @@ export interface ApprovedEmail {
   source: ApprovedEmailSource;
   smoove_contact_id: string | null;
   linked_user_id: string | null;
+  group_id: string | null;
   notes: string | null;
   approved_at: string;
   used_at: string | null;

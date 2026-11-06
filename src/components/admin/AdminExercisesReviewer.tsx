@@ -50,14 +50,16 @@ interface Props {
   submissions: SubmissionWithProfile[];
   groups: { id: string; name: string }[];
   initialGroupId?: string | null;
+  /** When set, the group picker is hidden and submissions are always scoped to this group (used inside a group's own page). */
+  lockedGroupId?: string;
 }
 
-export default function AdminExercisesReviewer({ submissions, groups, initialGroupId }: Props) {
+export default function AdminExercisesReviewer({ submissions, groups, initialGroupId, lockedGroupId }: Props) {
   // Filter to only submissions that require instructor review
   const reviewable = submissions.filter(s => REVIEW_MODULES.includes(s.modules?.order_number ?? 0));
 
   const [filter, setFilter] = useState<"all" | "submitted" | "reviewed">("submitted");
-  const [groupFilter, setGroupFilter] = useState<string | null>(initialGroupId ?? null);
+  const [groupFilter, setGroupFilter] = useState<string | null>(lockedGroupId ?? initialGroupId ?? null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [feedbacks, setFeedbacks] = useState<Record<string, string>>({});
   const [points, setPoints] = useState<Record<string, number>>({});
@@ -118,7 +120,9 @@ export default function AdminExercisesReviewer({ submissions, groups, initialGro
 
   return (
     <div className="flex flex-col lg:flex-row gap-4">
-      <AdminGroupFilter groups={groups} activeGroupId={groupFilter} onSelect={setGroupFilter} badge={pendingByGroup} />
+      {!lockedGroupId && (
+        <AdminGroupFilter groups={groups} activeGroupId={groupFilter} onSelect={setGroupFilter} badge={pendingByGroup} />
+      )}
 
       <div className="flex-1 min-w-0 space-y-4">
       {/* Filter tabs */}
