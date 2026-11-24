@@ -99,7 +99,9 @@ export default function AdminGroupSettings({ group, allStudents }: Props) {
       body: JSON.stringify({ groupId: group.id, userId }),
     });
     const data = await res.json();
-    setSingleInviteResult(prev => ({ ...prev, [userId]: data.error ? "שגיאה" : "✓" }));
+    const ok = !data.error && data.sent > 0;
+    const reason = data.error || data.errors?.[0] || "שגיאה לא ידועה";
+    setSingleInviteResult(prev => ({ ...prev, [userId]: ok ? "✓" : `שגיאה: ${reason}` }));
     setSendingSingle(null);
   }
 
@@ -111,7 +113,13 @@ export default function AdminGroupSettings({ group, allStudents }: Props) {
       body: JSON.stringify({ groupId: group.id }),
     });
     const data = await res.json();
-    setInviteResult(data.error ? `שגיאה: ${data.error}` : `✓ נשלחו ${data.sent} הזמנות`);
+    if (data.error) {
+      setInviteResult(`שגיאה: ${data.error}`);
+    } else if (data.sent === 0 && data.errors?.length) {
+      setInviteResult(`✗ נשלחו 0 הזמנות — ${data.errors[0]}`);
+    } else {
+      setInviteResult(`✓ נשלחו ${data.sent} הזמנות${data.errors?.length ? ` (${data.errors.length} נכשלו: ${data.errors[0]})` : ""}`);
+    }
     setSendingInvites(false);
   }
 
@@ -525,11 +533,13 @@ export default function AdminGroupSettings({ group, allStudents }: Props) {
                     type="button"
                     onClick={() => sendSingleInvitation(student.id)}
                     disabled={sendingSingle === student.id}
-                    title="שלח הזמנה לסטודנט זה בלבד"
+                    title={singleInviteResult[student.id]?.startsWith("שגיאה") ? singleInviteResult[student.id] : "שלח הזמנה לסטודנט זה בלבד"}
                     className="shrink-0 p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-40"
                   >
                     {singleInviteResult[student.id] === "✓"
                       ? <span className="text-green-600 text-xs font-bold">✓</span>
+                      : singleInviteResult[student.id]?.startsWith("שגיאה")
+                      ? <span className="text-red-500 text-xs font-bold">!</span>
                       : sendingSingle === student.id
                       ? <span className="text-xs">...</span>
                       : <Mail className="w-3.5 h-3.5" />}

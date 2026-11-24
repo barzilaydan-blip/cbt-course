@@ -14,6 +14,10 @@ export async function POST(req: NextRequest) {
     const { data: profile } = await service.from("profiles").select("role").eq("id", user.id).single();
     if (profile?.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+    if (!GOOGLE_SCRIPT_URL) {
+      return NextResponse.json({ error: "GOOGLE_SCRIPT_URL is not configured on the server" }, { status: 500 });
+    }
+
     const { groupId, userId } = await req.json() as { groupId: string; userId?: string };
 
     // Get group name and members
