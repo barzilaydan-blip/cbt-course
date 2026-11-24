@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/service";
-import { AlertTriangle, ChevronLeft, FileText, Headphones, Video } from "lucide-react";
+import { AlertTriangle, ChevronLeft, FileText, Headphones } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { Module } from "@/types";
 
@@ -14,7 +14,7 @@ export default async function AdminModulesPage() {
 
       <ul className="surface divide-y divide-slate-100 overflow-hidden">
         {((modules ?? []) as Module[]).map((mod) => {
-          const hasContent = mod.video_url || mod.article_url || mod.podcast_url;
+          const hasContent = mod.article_url || mod.podcast_url;
           return (
             <li key={mod.id}>
               <Link
@@ -27,7 +27,6 @@ export default async function AdminModulesPage() {
                 <span className="flex-1 min-w-0">
                   <span className="block font-semibold text-slate-900">{mod.title_he}</span>
                   <span className="flex flex-wrap gap-x-4 gap-y-0.5 mt-0.5 text-sm text-slate-600">
-                    {mod.video_url && <span className="inline-flex items-center gap-1"><Video className="w-3.5 h-3.5" aria-hidden="true" />סרטון</span>}
                     {mod.article_url && <span className="inline-flex items-center gap-1"><FileText className="w-3.5 h-3.5" aria-hidden="true" />מאמר</span>}
                     {mod.podcast_url && <span className="inline-flex items-center gap-1"><Headphones className="w-3.5 h-3.5" aria-hidden="true" />פודקאסט</span>}
                     {!hasContent && (

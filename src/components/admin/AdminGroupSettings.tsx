@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Plus, Users, Trash2, Save, CheckCircle, Upload, FileUp, Mail, Calendar, Video, Link as LinkIcon } from "lucide-react";
+import { Plus, Users, Trash2, Save, CheckCircle, Upload, FileUp, Mail, Calendar, Video } from "lucide-react";
 import type { Group, Profile } from "@/types";
 
 interface Props {
@@ -35,7 +35,7 @@ export default function AdminGroupSettings({ group, allStudents }: Props) {
   const [savingDate, setSavingDate] = useState(false);
   const [localDate, setLocalDate] = useState(group.course_start_date ?? "");
 
-  type ScheduleFields = { zoom_url: string; zoom_password: string; meeting_day_he: string; meeting_time: string; syllabus_url: string };
+  type ScheduleFields = { zoom_url: string; zoom_password: string; meeting_day_he: string; meeting_time: string };
   const [savingSchedule, setSavingSchedule] = useState(false);
   const [savedSchedule, setSavedSchedule] = useState(false);
   const [schedule, setSchedule] = useState<ScheduleFields>({
@@ -43,7 +43,6 @@ export default function AdminGroupSettings({ group, allStudents }: Props) {
     zoom_password: group.zoom_password ?? "",
     meeting_day_he: group.meeting_day_he ?? "",
     meeting_time: group.meeting_time ?? "",
-    syllabus_url: group.syllabus_url ?? "",
   });
 
   const [localAssignments, setLocalAssignments] = useState<Record<string, string | null>>(
@@ -157,7 +156,6 @@ export default function AdminGroupSettings({ group, allStudents }: Props) {
       zoom_password: schedule.zoom_password.trim() || null,
       meeting_day_he: schedule.meeting_day_he.trim() || null,
       meeting_time: schedule.meeting_time.trim() || null,
-      syllabus_url: schedule.syllabus_url.trim() || null,
     };
     await supabase.from("groups").update(payload).eq("id", group.id);
     setSavingSchedule(false);
@@ -386,20 +384,6 @@ export default function AdminGroupSettings({ group, allStudents }: Props) {
                 placeholder="123456"
                 value={schedule.zoom_password}
                 onChange={(e) => setSchedule(prev => ({ ...prev, zoom_password: e.target.value }))}
-                className="input-he"
-                dir="ltr"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-slate-500 mb-1 flex items-center gap-1">
-                <LinkIcon className="w-3 h-3" />
-                קישור לסילבוס
-              </label>
-              <input
-                type="url"
-                placeholder="https://drive.google.com/..."
-                value={schedule.syllabus_url}
-                onChange={(e) => setSchedule(prev => ({ ...prev, syllabus_url: e.target.value }))}
                 className="input-he"
                 dir="ltr"
               />

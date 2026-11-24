@@ -55,6 +55,14 @@ export interface GroupModuleDate {
   created_at: string;
 }
 
+export interface GroupModuleVideo {
+  id: string;
+  group_id: string;
+  module_id: string;
+  video_url: string;
+  created_at: string;
+}
+
 export interface Profile {
   id: string;
   name: string;

@@ -34,16 +34,19 @@ export default async function ModulePage({ params }: { params: { id: string } })
   const isAdmin = profile?.role === "admin";
   const groupId = profile?.group_id ?? null;
 
-  // Fetch group schedule for non-admins
+  // Fetch group schedule + this module's recording for non-admins
   let courseStartDate: string | null = null;
   let moduleDateOverrides = new Map<string, string>();
+  let groupVideoUrl: string | null = null;
   if (groupId && !isAdmin) {
-    const [{ data: groupData }, { data: overrides }] = await Promise.all([
+    const [{ data: groupData }, { data: overrides }, { data: recording }] = await Promise.all([
       service.from("groups").select("course_start_date").eq("id", groupId).single(),
       service.from("group_module_dates").select("module_id, unlock_date").eq("group_id", groupId),
+      service.from("group_module_videos").select("video_url").eq("group_id", groupId).eq("module_id", params.id).maybeSingle(),
     ]);
     courseStartDate = groupData?.course_start_date ?? null;
     ((overrides ?? []) as GroupModuleDate[]).forEach((o) => moduleDateOverrides.set(o.module_id, o.unlock_date));
+    groupVideoUrl = recording?.video_url ?? null;
   }
 
   const sorted = ((allModules ?? []) as { id: string; order_number: number; meeting_date: string | null; access_mode: "locked" | "open" | "auto" }[])
@@ -120,20 +123,20 @@ export default async function ModulePage({ params }: { params: { id: string } })
 
       {/* Video Hero */}
       <section aria-label="סרטון המפגש" className="bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
-        {currentMod.video_url ? (
+        {groupVideoUrl ? (
           <>
             <div className="bg-slate-900">
-              {currentMod.video_url.trimStart().startsWith("<") ? (
+              {groupVideoUrl.trimStart().startsWith("<") ? (
                 /* Full embed HTML (e.g. Vimeo responsive div+iframe) */
                 <div
-                  dangerouslySetInnerHTML={{ __html: currentMod.video_url }}
+                  dangerouslySetInnerHTML={{ __html: groupVideoUrl }}
                   className="w-full [&>div]:!padding-0 [&_iframe]:w-full [&_iframe]:aspect-video [&_iframe]:h-auto"
                 />
               ) : (
                 /* Plain URL */
                 <div className="aspect-video">
                   <iframe
-                    src={currentMod.video_url}
+                    src={groupVideoUrl}
                     className="w-full h-full"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen

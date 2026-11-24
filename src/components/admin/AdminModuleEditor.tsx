@@ -15,7 +15,6 @@ export default function AdminModuleEditor({ mod, initialQuiz }: Props) {
   const supabase = createClient();
   const router = useRouter();
 
-  const [videoUrl, setVideoUrl] = useState(mod.video_url ?? "");
   const [articleUrl, setArticleUrl] = useState(mod.article_url ?? "");
   const [podcastUrl, setPodcastUrl] = useState(mod.podcast_url ?? "");
   const [weeklyChallenge, setWeeklyChallenge] = useState(mod.weekly_challenge ?? "");
@@ -56,19 +55,11 @@ export default function AdminModuleEditor({ mod, initialQuiz }: Props) {
     setSaved(false);
   }
 
-  function toEmbedUrl(url: string): string | null {
-    if (!url) return null;
-    const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-    if (match) return `https://www.youtube.com/embed/${match[1]}`;
-    return url;
-  }
-
   async function handleSave() {
     setSaving(true);
 
     // Update module URLs + weekly challenge + meeting date
     await supabase.from("modules").update({
-      video_url: toEmbedUrl(videoUrl),
       article_url: articleUrl || null,
       podcast_url: podcastUrl || null,
       weekly_challenge: weeklyChallenge.trim() || null,
@@ -118,18 +109,9 @@ export default function AdminModuleEditor({ mod, initialQuiz }: Props) {
       {/* Content URLs */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
         <h2 className="font-bold text-brand-900 border-b border-slate-100 pb-3">קישורי תוכן</h2>
-
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1.5">קישור סרטון (YouTube embed URL)</label>
-          <input
-            type="url"
-            value={videoUrl}
-            onChange={(e) => { setVideoUrl(e.target.value); setSaved(false); }}
-            placeholder="https://www.youtube.com/embed/..."
-            className="input-he"
-            dir="ltr"
-          />
-        </div>
+        <p className="text-xs text-slate-400 -mt-2">
+          הקלטת המפגש (הווידאו) מנוהלת בנפרד לכל קבוצה — בטאב "הקלטות" בדף הקבוצה, לא כאן.
+        </p>
 
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1.5">קישור מאמר</label>

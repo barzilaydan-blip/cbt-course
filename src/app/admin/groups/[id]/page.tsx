@@ -10,7 +10,8 @@ import AdminQuestions from "@/components/admin/AdminQuestions";
 import AdminChatMonitor from "@/components/admin/AdminChatMonitor";
 import AdminChatTabs from "@/components/admin/AdminChatTabs";
 import AdminGroupTabs, { type GroupTabId } from "@/components/admin/AdminGroupTabs";
-import type { Group, Profile, ExerciseSubmission, Question, GroupMessage, QuizQuestion } from "@/types";
+import AdminGroupRecordings from "@/components/admin/AdminGroupRecordings";
+import type { Group, Profile, ExerciseSubmission, Question, GroupMessage, QuizQuestion, GroupModuleVideo } from "@/types";
 
 function formatDuration(seconds: number | null): string {
   if (seconds === null) return "—";
@@ -57,6 +58,7 @@ export default async function AdminGroupPage({
     { data: modules },
     { data: quizzes },
     { data: progressRows },
+    { data: groupVideos },
   ] = await Promise.all([
     service.from("profiles").select("id, name, email, role, total_points, group_id, phone, profession").eq("role", "student"),
     service.from("exercise_submissions").select("*, profiles(name, email, group_id), modules(order_number, title_he)").order("submitted_at", { ascending: false }),
@@ -67,6 +69,7 @@ export default async function AdminGroupPage({
     service.from("modules").select("id, order_number, title_he").order("order_number"),
     service.from("quizzes").select("module_id, questions"),
     service.from("progress").select("user_id, module_id, quiz_answers").not("quiz_answers", "is", null),
+    service.from("group_module_videos").select("module_id, video_url").eq("group_id", groupId),
   ]);
 
   const allStudents = (profiles ?? []) as Profile[];
@@ -123,9 +126,13 @@ export default async function AdminGroupPage({
     .filter(Boolean)
     .sort((a, b) => a!.mod.order_number - b!.mod.order_number);
 
-  const initialTab = (["settings", "approved", "attendance", "exercises", "quiz", "chat"] as GroupTabId[]).includes(searchParams.tab as GroupTabId)
+  const initialTab = (["settings", "approved", "recordings", "attendance", "exercises", "quiz", "chat"] as GroupTabId[]).includes(searchParams.tab as GroupTabId)
     ? (searchParams.tab as GroupTabId)
     : "settings";
+
+  const recordingsByModule = Object.fromEntries(
+    ((groupVideos ?? []) as Pick<GroupModuleVideo, "module_id" | "video_url">[]).map((v) => [v.module_id, v.video_url])
+  );
 
   return (
     <div className="space-y-6">
@@ -139,6 +146,14 @@ export default async function AdminGroupPage({
 
           approved: (
             <AdminApprovedEmails initialEmails={approvedEmails ?? []} groupId={groupId} />
+          ),
+
+          recordings: (
+            <AdminGroupRecordings
+              groupId={groupId}
+              modules={(modules ?? []) as { id: string; order_number: number; title_he: string }[]}
+              existing={recordingsByModule}
+            />
           ),
 
           attendance: (

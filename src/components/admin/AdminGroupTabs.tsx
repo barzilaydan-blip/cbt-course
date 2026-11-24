@@ -1,13 +1,14 @@
 "use client";
 import { useState, type ReactNode } from "react";
-import { SlidersHorizontal, ShieldCheck, Activity, ClipboardList, BarChart3, MessageCircle } from "lucide-react";
+import { SlidersHorizontal, ShieldCheck, Activity, ClipboardList, BarChart3, MessageCircle, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type GroupTabId = "settings" | "approved" | "attendance" | "exercises" | "quiz" | "chat";
+export type GroupTabId = "settings" | "approved" | "attendance" | "exercises" | "quiz" | "chat" | "recordings";
 
 const TABS: { id: GroupTabId; label: string; icon: typeof SlidersHorizontal }[] = [
   { id: "settings", label: "הגדרות", icon: SlidersHorizontal },
   { id: "approved", label: "גישה ומיילים", icon: ShieldCheck },
+  { id: "recordings", label: "הקלטות", icon: Video },
   { id: "attendance", label: "נוכחות", icon: Activity },
   { id: "exercises", label: "תרגילים", icon: ClipboardList },
   { id: "quiz", label: "חידונים", icon: BarChart3 },

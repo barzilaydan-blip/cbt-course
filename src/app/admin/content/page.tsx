@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { BookOpen, ChevronLeft, FolderOpen } from "lucide-react";
+import { createServiceClient } from "@/lib/supabase/service";
 import { PageHeader } from "@/components/ui/PageHeader";
+import AdminSyllabusSettings from "@/components/admin/AdminSyllabusSettings";
 
-export default function AdminContentPage() {
+export default async function AdminContentPage() {
+  const service = createServiceClient();
+  const { data: settings } = await service.from("course_settings").select("syllabus_url").eq("id", 1).maybeSingle();
+
   return (
     <div className="space-y-6">
       <PageHeader title="ניהול משאבים" description="עריכת תוכן המפגשים או הוספת קבצים ושאלונים" />
@@ -14,7 +19,7 @@ export default function AdminContentPage() {
           </span>
           <span className="flex-1 min-w-0">
             <span className="block font-bold text-lg text-slate-900">ניהול מפגשים</span>
-            <span className="block text-sm text-slate-600">וידאו, מאמר, פודקאסט וחידון לכל מפגש</span>
+            <span className="block text-sm text-slate-600">מאמר, פודקאסט וחידון לכל מפגש (הקלטת הווידאו נקבעת בדף כל קבוצה)</span>
           </span>
           <ChevronLeft className="w-5 h-5 text-slate-400 group-hover:text-brand-600 transition-colors shrink-0" aria-hidden="true" />
         </Link>
@@ -29,6 +34,10 @@ export default function AdminContentPage() {
           </span>
           <ChevronLeft className="w-5 h-5 text-slate-400 group-hover:text-brand-600 transition-colors shrink-0" aria-hidden="true" />
         </Link>
+      </div>
+
+      <div className="max-w-3xl">
+        <AdminSyllabusSettings initialUrl={settings?.syllabus_url ?? ""} />
       </div>
     </div>
   );
