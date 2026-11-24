@@ -64,16 +64,56 @@ export default function AdminGroupSettings({ group, allStudents }: Props) {
   const [deletingStudent, setDeletingStudent] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  function parseCSV(text: string): ImportRow[] {
-    const lines = text.trim().split(/\r?\n/);
+  /** Splits one CSV line into cells, respecting quoted fields (so commas/escaped quotes inside a quoted value don't break alignment). */
+  function splitCsvLine(line: string): string[] {
+    const cells: string[] = [];
+    let cur = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQuotes) {
+        if (ch === '"') {
+          if (line[i + 1] === '"') { cur += '"'; i++; }
+          else inQuotes = false;
+        } else {
+          cur += ch;
+        }
+      } else if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ",") {
+        cells.push(cur.trim());
+        cur = "";
+      } else {
+        cur += ch;
+      }
+    }
+    cells.push(cur.trim());
+    return cells;
+  }
+
+  /** Matches columns by header name (not position), so extra/reordered columns — e.g. a "Timestamp" column from a Google Forms export — don't silently misalign the data. */
+  function parseCSV(text: string): ImportRow[] | null {
+    const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) return [];
+    const headers = splitCsvLine(lines[0]).map(h => h.toLowerCase());
+    const findCol = (...names: string[]) => headers.findIndex(h => names.includes(h));
+
+    const firstNameIdx = findCol("שם פרטי", "שם", "first name", "firstname");
+    const lastNameIdx = findCol("שם משפחה", "last name", "lastname");
+    const emailIdx = findCol("כתובת מייל", "מייל", "אימייל", "דואר אלקטרוני", "email", "e-mail");
+    const phoneIdx = findCol("טלפון", "phone", "מספר טלפון");
+    const professionIdx = findCol("מקצוע", "רקע מקצועי", "profession", "occupation");
+
+    if (emailIdx === -1) return null; // no recognizable email column — caller shows an error instead of guessing
+
     return lines.slice(1).map(line => {
-      const cols = line.split(",").map(c => c.trim().replace(/^"|"$/g, ""));
+      const cols = splitCsvLine(line);
       return {
-        firstName: cols[0] ?? "",
-        lastName: cols[1] ?? "",
-        email: cols[2] ?? "",
-        phone: cols[3] ?? "",
-        profession: cols[4] ?? "",
+        firstName: firstNameIdx >= 0 ? (cols[firstNameIdx] ?? "") : "",
+        lastName: lastNameIdx >= 0 ? (cols[lastNameIdx] ?? "") : "",
+        email: (cols[emailIdx] ?? "").toLowerCase(),
+        phone: phoneIdx >= 0 ? (cols[phoneIdx] ?? "") : "",
+        profession: professionIdx >= 0 ? (cols[professionIdx] ?? "") : "",
       };
     }).filter(r => r.email.includes("@"));
   }
@@ -84,8 +124,16 @@ export default function AdminGroupSettings({ group, allStudents }: Props) {
     const reader = new FileReader();
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
-      setImportRows(parseCSV(text));
-      setImportResult(null);
+      const rows = parseCSV(text);
+      if (rows === null) {
+        setImportRows([]);
+        setImportResult("שגיאה: לא נמצאה עמודת אימייל בקובץ (כותרת 'כתובת מייל' / 'אימייל' / 'email')");
+      } else if (rows.length === 0) {
+        setImportResult("שגיאה: לא נמצאו שורות עם אימייל תקין בקובץ");
+      } else {
+        setImportRows(rows);
+        setImportResult(null);
+      }
     };
     reader.readAsText(file, "utf-8");
   }
