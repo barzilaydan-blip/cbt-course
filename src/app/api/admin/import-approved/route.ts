@@ -51,7 +51,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No valid emails found in file" }, { status: 400 });
   }
 
-  // Upsert all emails — ignoreDuplicates = skip existing, don't overwrite
+  // Upsert all emails — updates group_id even if the email already exists
+  // (e.g. from an older manual entry predating groups), so re-importing into
+  // a new group's CSV actually assigns them to it.
   const rows = emails.map(email => ({
     email,
     status: "active",
@@ -61,7 +63,7 @@ export async function POST(req: NextRequest) {
 
   const { error } = await service
     .from("approved_emails")
-    .upsert(rows, { onConflict: "email", ignoreDuplicates: true });
+    .upsert(rows, { onConflict: "email" });
 
   if (error) {
     console.error("import-approved error:", error);

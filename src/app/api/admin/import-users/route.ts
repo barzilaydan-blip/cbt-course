@@ -72,10 +72,12 @@ export async function POST(req: NextRequest) {
         results.created++;
       }
 
-      // Also approve this email for Google OAuth login
+      // Also approve this email for Google OAuth login — keep group_id in sync
+      // even if the email was already approved from an older entry, so a
+      // re-registration via auth/callback assigns the right group.
       await service.from("approved_emails").upsert(
-        { email, status: "active", source: "csv_import" },
-        { onConflict: "email", ignoreDuplicates: true }
+        { email, status: "active", source: "csv_import", group_id: groupId },
+        { onConflict: "email" }
       );
     }
 
