@@ -59,6 +59,7 @@ export default async function AdminGroupPage({
     { data: quizzes },
     { data: progressRows },
     { data: groupVideos },
+    { data: allGroups },
   ] = await Promise.all([
     service.from("profiles").select("id, name, email, role, total_points, group_id, phone, profession").eq("role", "student"),
     service.from("exercise_submissions").select("*, profiles(name, email, group_id), modules(order_number, title_he)").order("submitted_at", { ascending: false }),
@@ -70,6 +71,7 @@ export default async function AdminGroupPage({
     service.from("quizzes").select("module_id, questions"),
     service.from("progress").select("user_id, module_id, quiz_answers").not("quiz_answers", "is", null),
     service.from("group_module_videos").select("module_id, video_url").eq("group_id", groupId),
+    service.from("groups").select("id, name").order("created_at"),
   ]);
 
   const allStudents = (profiles ?? []) as Profile[];
@@ -142,7 +144,13 @@ export default async function AdminGroupPage({
         initialTab={initialTab}
         badges={{ exercises: pendingExercisesCount, chat: pendingQuestionsCount }}
         content={{
-          settings: <AdminGroupSettings group={group as Group} allStudents={allStudents} />,
+          settings: (
+            <AdminGroupSettings
+              group={group as Group}
+              allStudents={allStudents}
+              allGroups={(allGroups ?? []) as { id: string; name: string }[]}
+            />
+          ),
 
           approved: (
             <AdminApprovedEmails initialEmails={approvedEmails ?? []} groupId={groupId} />

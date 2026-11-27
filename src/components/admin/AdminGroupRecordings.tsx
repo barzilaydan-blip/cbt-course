@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Save, CheckCircle, Video } from "lucide-react";
+import { Save, CheckCircle, Video, Eye, EyeOff } from "lucide-react";
 
 interface ModuleRow {
   id: string;
@@ -28,6 +28,7 @@ export default function AdminGroupRecordings({ groupId, modules, existing }: Pro
   const [values, setValues] = useState<Record<string, string>>(existing);
   const [saving, setSaving] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
+  const [previewing, setPreviewing] = useState<string | null>(null);
 
   async function save(moduleId: string) {
     setSaving(moduleId);
@@ -71,6 +72,15 @@ export default function AdminGroupRecordings({ groupId, modules, existing }: Pro
                 dir="ltr"
               />
               <button
+                onClick={() => setPreviewing((prev) => (prev === mod.id ? null : mod.id))}
+                disabled={!(values[mod.id] ?? "").trim()}
+                title="צפה בסרטון — כך תראה מנהל/ת את מה שהסטודנטים רואים"
+                className="shrink-0 flex items-center gap-1.5 border border-slate-300 hover:border-brand-400 text-slate-700 px-3 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-40"
+              >
+                {previewing === mod.id ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {previewing === mod.id ? "הסתר" : "תצוגה מקדימה"}
+              </button>
+              <button
                 onClick={() => save(mod.id)}
                 disabled={saving === mod.id}
                 className="shrink-0 flex items-center gap-1.5 bg-brand-500 hover:bg-brand-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
@@ -79,6 +89,30 @@ export default function AdminGroupRecordings({ groupId, modules, existing }: Pro
                 {saving === mod.id ? "שומר..." : saved === mod.id ? "נשמר" : "שמור"}
               </button>
             </div>
+
+            {previewing === mod.id && (() => {
+              const embed = toEmbedUrl((values[mod.id] ?? "").trim());
+              if (!embed) return null;
+              return (
+                <div className="bg-slate-900 rounded-lg overflow-hidden">
+                  {embed.trimStart().startsWith("<") ? (
+                    <div
+                      dangerouslySetInnerHTML={{ __html: embed }}
+                      className="w-full [&_iframe]:w-full [&_iframe]:aspect-video [&_iframe]:h-auto"
+                    />
+                  ) : (
+                    <div className="aspect-video">
+                      <iframe
+                        src={embed}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         ))}
         {modules.length === 0 && (

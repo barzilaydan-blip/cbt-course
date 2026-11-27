@@ -9,7 +9,11 @@ interface Props {
   group: Group;
   /** Every student in the system, so membership toggles and "in another group" badges work. */
   allStudents: Profile[];
+  /** Every group in the system, so the "in another group" badge can name it. */
+  allGroups: { id: string; name: string }[];
 }
+
+type AssignFilter = "all" | "this" | "other" | "none";
 
 interface ImportRow {
   firstName: string;
@@ -22,9 +26,11 @@ interface ImportRow {
 const EMPTY_MANUAL: ImportRow = { firstName: "", lastName: "", email: "", phone: "", profession: "" };
 const DAYS = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
 
-export default function AdminGroupSettings({ group, allStudents }: Props) {
+export default function AdminGroupSettings({ group, allStudents, allGroups }: Props) {
   const supabase = createClient();
   const router = useRouter();
+  const groupNameById = new Map(allGroups.map((g) => [g.id, g.name]));
+  const [assignFilter, setAssignFilter] = useState<AssignFilter>("all");
 
   const [isActive, setIsActive] = useState(group.is_active);
   const [sendingInvites, setSendingInvites] = useState(false);
@@ -531,11 +537,45 @@ export default function AdminGroupSettings({ group, allStudents }: Props) {
 
       {/* Student assignment */}
       <div className="surface p-5">
-        <p className="text-sm font-semibold text-slate-600 mb-3">שייך סטודנטים לקבוצה:</p>
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+          <p className="text-sm font-semibold text-slate-600">שייך סטודנטים לקבוצה:</p>
+          <div className="flex gap-1 flex-wrap">
+            {([
+              ["all", "הכל"],
+              ["this", "בקבוצה זו"],
+              ["other", "קבוצות אחרות"],
+              ["none", "ללא שיוך"],
+            ] as [AssignFilter, string][]).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setAssignFilter(value)}
+                className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
+                  assignFilter === value
+                    ? "bg-brand-500 text-white border-brand-500"
+                    : "bg-white text-slate-600 border-slate-200 hover:border-brand-300"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="space-y-2 max-h-80 overflow-y-auto">
-          {allStudents.map((student) => {
+          {(() => { const filteredStudents = allStudents.filter((student) => {
+            const assignedGroupId = localAssignments[student.id];
+            if (assignFilter === "this") return assignedGroupId === group.id;
+            if (assignFilter === "other") return !!assignedGroupId && assignedGroupId !== group.id;
+            if (assignFilter === "none") return !assignedGroupId;
+            return true;
+          }); return filteredStudents.length === 0 ? (
+            <p className="text-slate-400 text-sm text-center py-4">
+              {allStudents.length === 0 ? "אין סטודנטים במערכת" : "אין סטודנטים התואמים לסינון"}
+            </p>
+          ) : filteredStudents.map((student) => {
             const isInThisGroup = localAssignments[student.id] === group.id;
-            const isInOtherGroup = localAssignments[student.id] && localAssignments[student.id] !== group.id;
+            const otherGroupId = localAssignments[student.id] && localAssignments[student.id] !== group.id ? localAssignments[student.id] : null;
+            const isUnassigned = !isInThisGroup && !otherGroupId;
 
             return (
               <div
@@ -557,8 +597,13 @@ export default function AdminGroupSettings({ group, allStudents }: Props) {
                   <p className="font-medium text-sm text-slate-800 truncate">{student.name || "—"}</p>
                   <p className="text-xs text-slate-400 truncate" dir="ltr">{student.email}</p>
                 </div>
-                {isInOtherGroup && (
-                  <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full shrink-0">קבוצה אחרת</span>
+                {otherGroupId && (
+                  <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full shrink-0">
+                    {groupNameById.get(otherGroupId) ?? "קבוצה אחרת"}
+                  </span>
+                )}
+                {isUnassigned && (
+                  <span className="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full shrink-0">ללא שיוך</span>
                 )}
                 {isInThisGroup && (
                   <button
@@ -587,10 +632,7 @@ export default function AdminGroupSettings({ group, allStudents }: Props) {
                 </button>
               </div>
             );
-          })}
-          {allStudents.length === 0 && (
-            <p className="text-slate-400 text-sm text-center py-4">אין סטודנטים במערכת</p>
-          )}
+          }); })()}
         </div>
 
         <button
